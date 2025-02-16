@@ -1371,6 +1371,45 @@ export type Database = {
         }
         Relationships: []
       }
+      youtube_search_results: {
+        Row: {
+          category: string | null
+          comments: number | null
+          created_at: string | null
+          engagement_score: number | null
+          id: string
+          likes: number | null
+          query: string
+          title: string
+          video_id: string
+          views: number | null
+        }
+        Insert: {
+          category?: string | null
+          comments?: number | null
+          created_at?: string | null
+          engagement_score?: number | null
+          id?: string
+          likes?: number | null
+          query: string
+          title: string
+          video_id: string
+          views?: number | null
+        }
+        Update: {
+          category?: string | null
+          comments?: number | null
+          created_at?: string | null
+          engagement_score?: number | null
+          id?: string
+          likes?: number | null
+          query?: string
+          title?: string
+          video_id?: string
+          views?: number | null
+        }
+        Relationships: []
+      }
       youtube_video_metrics: {
         Row: {
           channel_id: string
