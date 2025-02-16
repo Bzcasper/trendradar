@@ -15,8 +15,11 @@ interface VideoResult {
   likes: number;
   comments: number;
   category: string;
-  engagement_score: number;
   thumbnail_url: string;
+  engagement_rate?: number;
+  view_velocity?: number;
+  trending_score?: number;
+  viral_probability?: number;
 }
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
@@ -58,22 +61,22 @@ export const YouTubeAnalytics = () => {
     if (existingCategory) {
       existingCategory.value += 1;
     } else {
-      acc.push({ name: video.category, value: 1 });
+      acc.push({ name: video.category || 'Uncategorized', value: 1 });
     }
     return acc;
   }, []);
 
   // Prepare data for bar charts
   const viewsData = searchResults.map(video => ({
-    name: video.title.substring(0, 20) + "...",
-    views: video.views,
+    name: video.title?.substring(0, 20) + "..." || 'Untitled',
+    views: video.views || 0,
   }));
 
   const engagementData = searchResults.map(video => ({
-    name: video.title.substring(0, 20) + "...",
-    likes: video.likes,
-    comments: video.comments,
-    engagement: video.engagement_score,
+    name: video.title?.substring(0, 20) + "..." || 'Untitled',
+    likes: video.likes || 0,
+    comments: video.comments || 0,
+    engagement: video.engagement_rate || 0,
   }));
 
   return (
@@ -106,9 +109,9 @@ export const YouTubeAnalytics = () => {
                         <span>{video.title}</span>
                       </div>
                     </TableCell>
-                    <TableCell>{video.views.toLocaleString()}</TableCell>
-                    <TableCell>{video.engagement_score.toFixed(2)}%</TableCell>
-                    <TableCell>{video.category}</TableCell>
+                    <TableCell>{video.views?.toLocaleString() || '0'}</TableCell>
+                    <TableCell>{(video.engagement_rate || 0).toFixed(2)}%</TableCell>
+                    <TableCell>{video.category || 'Uncategorized'}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
