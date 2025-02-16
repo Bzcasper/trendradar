@@ -5,13 +5,18 @@ import { DashboardCard } from "./DashboardCard";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "./ui/use-toast";
 
 interface VideoResult {
   id: string;
+  video_id: string;
   title: string;
   views: number;
-  engagement_score: number;
+  likes: number;
+  comments: number;
   category: string;
+  engagement_score: number;
+  thumbnail_url: string;
 }
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
@@ -19,20 +24,29 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 export const YouTubeAnalytics = () => {
   const [searchResults, setSearchResults] = useState<VideoResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   const handleSearch = async (query: string) => {
     setIsLoading(true);
     try {
-      // In a real implementation, this would call your YouTube API edge function
-      // and store results in Supabase. For now, we'll simulate some results:
-      const mockResults = [
-        { id: '1', title: 'Video 1', views: 1000000, engagement_score: 0.8, category: 'Gaming' },
-        { id: '2', title: 'Video 2', views: 500000, engagement_score: 0.6, category: 'Music' },
-        { id: '3', title: 'Video 3', views: 750000, engagement_score: 0.7, category: 'Education' },
-      ];
-      setSearchResults(mockResults);
+      const { data, error } = await supabase.functions.invoke('youtube-search', {
+        body: { query }
+      });
+
+      if (error) throw error;
+      setSearchResults(data);
+      
+      toast({
+        title: "Search completed",
+        description: `Found ${data.length} results for "${query}"`,
+      });
     } catch (error) {
       console.error('Search failed:', error);
+      toast({
+        title: "Search failed",
+        description: error.message,
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -49,9 +63,17 @@ export const YouTubeAnalytics = () => {
     return acc;
   }, []);
 
+  const engagementData = searchResults.map(video => ({
+    name: video.title.substring(0, 30) + "...",
+    engagement: video.engagement_score,
+    views: video.views,
+    likes: video.likes,
+    comments: video.comments,
+  }));
+
   return (
     <div className="space-y-8">
-      <SearchBox onSearch={handleSearch} />
+      <SearchBox onSearch={handleSearch} isLoading={isLoading} />
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <DashboardCard title="Search Results">
@@ -60,16 +82,25 @@ export const YouTubeAnalytics = () => {
               <TableRow>
                 <TableHead>Title</TableHead>
                 <TableHead>Views</TableHead>
-                <TableHead>Engagement Score</TableHead>
+                <TableHead>Engagement</TableHead>
                 <TableHead>Category</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {searchResults.map((video) => (
                 <TableRow key={video.id}>
-                  <TableCell className="font-medium">{video.title}</TableCell>
+                  <TableCell className="font-medium">
+                    <div className="flex items-center gap-2">
+                      <img 
+                        src={video.thumbnail_url} 
+                        alt={video.title}
+                        className="w-10 h-10 rounded object-cover"
+                      />
+                      <span>{video.title}</span>
+                    </div>
+                  </TableCell>
                   <TableCell>{video.views.toLocaleString()}</TableCell>
-                  <TableCell>{(video.engagement_score * 100).toFixed(1)}%</TableCell>
+                  <TableCell>{video.engagement_score.toFixed(2)}%</TableCell>
                   <TableCell>{video.category}</TableCell>
                 </TableRow>
               ))}

@@ -758,6 +758,24 @@ export type Database = {
         }
         Relationships: []
       }
+      search_queries: {
+        Row: {
+          created_at: string | null
+          id: string
+          query: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          query: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          query?: string
+        }
+        Relationships: []
+      }
       search_results: {
         Row: {
           created_at: string
@@ -1461,6 +1479,51 @@ export type Database = {
         }
         Relationships: []
       }
+      youtube_videos: {
+        Row: {
+          category: string | null
+          comments: number | null
+          created_at: string | null
+          description: string | null
+          engagement_score: number | null
+          id: string
+          likes: number | null
+          published_at: string | null
+          thumbnail_url: string | null
+          title: string
+          video_id: string
+          views: number | null
+        }
+        Insert: {
+          category?: string | null
+          comments?: number | null
+          created_at?: string | null
+          description?: string | null
+          engagement_score?: number | null
+          id?: string
+          likes?: number | null
+          published_at?: string | null
+          thumbnail_url?: string | null
+          title: string
+          video_id: string
+          views?: number | null
+        }
+        Update: {
+          category?: string | null
+          comments?: number | null
+          created_at?: string | null
+          description?: string | null
+          engagement_score?: number | null
+          id?: string
+          likes?: number | null
+          published_at?: string | null
+          thumbnail_url?: string | null
+          title?: string
+          video_id?: string
+          views?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       project_search: {
@@ -1501,6 +1564,14 @@ export type Database = {
           data: string
         }
         Returns: string
+      }
+      calculate_engagement_score: {
+        Args: {
+          views: number
+          likes: number
+          comments: number
+        }
+        Returns: number
       }
       custom_access_token_hook: {
         Args: {

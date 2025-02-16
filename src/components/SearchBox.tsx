@@ -2,12 +2,14 @@
 import { useState } from "react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
+import { Loader2 } from "lucide-react";
 
 interface SearchBoxProps {
   onSearch: (query: string) => void;
+  isLoading?: boolean;
 }
 
-export const SearchBox = ({ onSearch }: SearchBoxProps) => {
+export const SearchBox = ({ onSearch, isLoading }: SearchBoxProps) => {
   const [query, setQuery] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -25,8 +27,18 @@ export const SearchBox = ({ onSearch }: SearchBoxProps) => {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         className="flex-1"
+        disabled={isLoading}
       />
-      <Button type="submit">Search</Button>
+      <Button type="submit" disabled={isLoading}>
+        {isLoading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Searching
+          </>
+        ) : (
+          'Search'
+        )}
+      </Button>
     </form>
   );
 };
