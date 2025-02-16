@@ -86,25 +86,34 @@ Deno.serve(async (req) => {
           published_at: new Date().toISOString(),
         }
 
-        // Insert video data
+        // Insert video data with proper upsert handling
         const { data: video, error: videoError } = await supabaseClient
           .from('youtube_videos')
-          .upsert(videoData)
+          .upsert(videoData, {
+            onConflict: 'video_id',
+            ignoreDuplicates: false,
+            returning: true
+          })
           .select()
           .single()
 
         if (videoError) throw videoError
 
-        // Create search result entry
-        await supabaseClient.from('search_results').insert({
-          query_id: queryData.id,
-          video_id: video.id,
-          rank: index + 1,
-        })
+        // Create search result entry - use upsert here too to prevent duplicates
+        await supabaseClient
+          .from('search_results')
+          .upsert({
+            query_id: queryData.id,
+            video_id: video.id,
+            rank: index + 1,
+          }, {
+            onConflict: 'query_id,video_id',
+            ignoreDuplicates: true
+          })
 
         return {
           ...video,
-          engagement_score: (video.likes + video.comments) / video.views * 100,
+          engagement_score: video.views > 0 ? ((video.likes + video.comments) / video.views) * 100 : 0,
         }
       })
     )
