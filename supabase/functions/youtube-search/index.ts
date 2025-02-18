@@ -243,7 +243,7 @@ Deno.serve(async (req) => {
     if (queryError) throw queryError
 
     const processedVideos = await Promise.all(
-      searchData.items.map(async (item: YouTubeVideo) => {
+      searchData.items.map(async (item: YouTubeVideo, index: number) => {
         const statsResponse = await fetch(
           `https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${item.id.videoId}&key=${YOUTUBE_API_KEY}`
         )
@@ -255,41 +255,15 @@ Deno.serve(async (req) => {
         const comments = parseInt(stats.statistics.commentCount || '0')
         const publishedAt = item.snippet.publishedAt
 
-        // Enhanced analysis using both parts of the algorithm
-        const viewHistory = [views * 0.7, views * 0.8, views * 0.9, views]; // Simplified history
-        const rsi = calculateRSI(viewHistory);
-        const averageViews = viewHistory.reduce((a, b) => a + b, 0) / viewHistory.length;
-        const relativeVolume = calculateRelativeVolume(views, averageViews);
-        const fiboLevel = 61.8; // Using golden ratio as default
-
-        // Get AI categorization
+        // Get AI categorization and keywords
         const aiCategory = await categorizeContent(
           item.snippet.title,
           item.snippet.description
         );
 
-        // Extract keywords
         const keywords = extractKeywords(
           item.snippet.title,
           item.snippet.description
-        );
-
-        // Calculate all metrics
-        const viewVelocity = calculateViewVelocity(views, publishedAt);
-        const engagementRate = calculateEngagementRate(likes, comments, views);
-        const audienceRetention = 50; // Placeholder
-        const trendAcceleration = calculateTrendAcceleration(viewVelocity, viewVelocity * 0.8);
-        const movingAverage = calculateMovingAverage(viewVelocity, [viewVelocity * 0.8, viewVelocity * 0.9]);
-
-        const enhancedTrendingScore = calculateEnhancedTrendingScore(
-          viewVelocity,
-          engagementRate,
-          audienceRetention,
-          trendAcceleration,
-          movingAverage,
-          rsi,
-          relativeVolume,
-          fiboLevel
         );
 
         const videoData = {
@@ -300,23 +274,15 @@ Deno.serve(async (req) => {
           views,
           likes,
           comments,
-          category: aiCategory, // Use AI-generated category
+          category: aiCategory,
           published_at: publishedAt,
+          keywords
         }
 
         // Store video data
         const { data: video, error: videoError } = await supabaseClient
           .from('youtube_videos')
-          .upsert({
-            ...videoData,
-            view_velocity: viewVelocity,
-            engagement_rate: engagementRate,
-            trending_score: enhancedTrendingScore,
-            rsi,
-            relative_volume: relativeVolume,
-            fibo_level: fiboLevel,
-            keywords,
-          }, {
+          .upsert(videoData, {
             onConflict: 'video_id',
             ignoreDuplicates: false,
             returning: true
@@ -326,52 +292,38 @@ Deno.serve(async (req) => {
 
         if (videoError) throw videoError
 
-        // Store trend metrics
-        await supabaseClient
-          .from('trend_metrics')
-          .upsert({
-            video_id: item.id.videoId,
-            title: item.snippet.title,
-            view_velocity: viewVelocity,
-            engagement_rate: engagementRate,
-            audience_retention: audienceRetention,
-            trending_score: enhancedTrendingScore,
-            trend_acceleration: trendAcceleration,
-            moving_average: movingAverage,
-            viral_probability: calculateViralProbability(viewVelocity, engagementRate, trendAcceleration),
-            metadata: {
-              views,
-              likes,
-              comments,
-              published_at: publishedAt,
-              category: aiCategory // Store AI category in metadata
-            }
-          }, {
-            onConflict: 'video_id',
-            ignoreDuplicates: false
-          })
-
-        // Store search results
-        await supabaseClient
-          .from('search_results')
-          .upsert({
-            query_id: queryData.id,
-            video_id: video.id,
-            rank: index + 1,
-          }, {
-            onConflict: 'query_id,video_id',
-            ignoreDuplicates: true
-          })
+        // Send processed data to webhook
+        try {
+          await fetch('https://vaubsaaeexjdgzpzuqcm.functions.supabase.co/webhook-sender', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...corsHeaders
+            },
+            body: JSON.stringify({
+              data: {
+                ...videoData,
+                ai_analysis: {
+                  category: aiCategory,
+                  keywords: keywords
+                },
+                metrics: {
+                  views,
+                  likes,
+                  comments
+                }
+              }
+            })
+          });
+        } catch (webhookError) {
+          console.error('Webhook delivery failed:', webhookError);
+          // Continue processing even if webhook fails
+        }
 
         return {
           ...video,
-          view_velocity: viewVelocity,
-          engagement_rate: engagementRate,
-          trending_score: enhancedTrendingScore,
-          rsi,
-          relative_volume: relativeVolume,
-          fibo_level: fiboLevel,
-          keywords,
+          category: aiCategory,
+          keywords
         }
       })
     )
