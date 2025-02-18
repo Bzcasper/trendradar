@@ -1,4 +1,3 @@
-
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
 import { corsHeaders } from '../_shared/cors.ts'
 
@@ -19,6 +18,54 @@ interface VideoStats {
     likeCount: string;
     commentCount: string;
   };
+}
+
+// Function to categorize content using OpenAI
+async function categorizeContent(title: string, description: string): Promise<string> {
+  const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+  
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: `You are a content categorization expert. Analyze the video title and description and return ONLY ONE of the following categories:
+              - Technology
+              - Gaming
+              - Education
+              - Entertainment
+              - Music
+              - Sports
+              - News
+              - Lifestyle
+              - Business
+              - Science
+              - Arts
+              - Travel
+              Return ONLY the category name, nothing else.`
+          },
+          {
+            role: 'user',
+            content: `Title: ${title}\nDescription: ${description}`
+          }
+        ],
+        temperature: 0.3, // Lower temperature for more consistent categorization
+      }),
+    });
+
+    const data = await response.json();
+    return data.choices[0].message.content.trim();
+  } catch (error) {
+    console.error('Error categorizing content:', error);
+    return 'Uncategorized';
+  }
 }
 
 // Calculate view velocity
@@ -113,7 +160,7 @@ Deno.serve(async (req) => {
     if (queryError) throw queryError
 
     const processedVideos = await Promise.all(
-      searchData.items.map(async (item: YouTubeVideo, index: number) => {
+      searchData.items.map(async (item: YouTubeVideo) => {
         const statsResponse = await fetch(
           `https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${item.id.videoId}&key=${YOUTUBE_API_KEY}`
         )
@@ -125,11 +172,17 @@ Deno.serve(async (req) => {
         const comments = parseInt(stats.statistics.commentCount || '0')
         const publishedAt = item.snippet.publishedAt
 
+        // Get AI-powered categorization
+        const aiCategory = await categorizeContent(
+          item.snippet.title,
+          item.snippet.description
+        );
+
         // Calculate metrics
         const viewVelocity = calculateViewVelocity(views, publishedAt)
         const engagementRate = calculateEngagementRate(likes, comments, views)
-        const audienceRetention = 50 // Placeholder - real data would come from YouTube Analytics API
-        const trendAcceleration = calculateTrendAcceleration(viewVelocity, viewVelocity * 0.8) // Simplified
+        const audienceRetention = 50 // Placeholder
+        const trendAcceleration = calculateTrendAcceleration(viewVelocity, viewVelocity * 0.8)
         const movingAverage = calculateMovingAverage(viewVelocity, [viewVelocity * 0.8, viewVelocity * 0.9])
         const viralProbability = calculateViralProbability(viewVelocity, engagementRate, trendAcceleration)
         const trendingScore = calculateTrendingScore(
@@ -149,7 +202,7 @@ Deno.serve(async (req) => {
           views,
           likes,
           comments,
-          category: item.snippet.categoryId,
+          category: aiCategory, // Use AI-generated category
           published_at: publishedAt,
         }
 
@@ -183,7 +236,8 @@ Deno.serve(async (req) => {
               views,
               likes,
               comments,
-              published_at: publishedAt
+              published_at: publishedAt,
+              category: aiCategory // Store AI category in metadata
             }
           }, {
             onConflict: 'video_id',
