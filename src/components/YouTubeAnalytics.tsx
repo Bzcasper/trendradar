@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { SearchBox } from "./SearchBox";
 import { DashboardCard } from "./DashboardCard";
@@ -23,9 +22,15 @@ interface VideoResult {
   view_velocity?: number;
   trending_score?: number;
   viral_probability?: number;
+  keywords?: { keyword: string; count: number }[];
 }
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
+
+interface KeywordData {
+  keyword: string;
+  count: number;
+}
 
 export const YouTubeAnalytics = () => {
   const [searchResults, setSearchResults] = useState<VideoResult[]>([]);
@@ -84,6 +89,21 @@ export const YouTubeAnalytics = () => {
     trending: video.trending_score || 0,
     viral: (video.viral_probability || 0) * 100,
   }));
+
+  // Prepare keyword data
+  const keywordData = searchResults.reduce((acc: KeywordData[], video) => {
+    if (video.keywords) {
+      video.keywords.forEach(({ keyword, count }) => {
+        const existing = acc.find(k => k.keyword === keyword);
+        if (existing) {
+          existing.count += count;
+        } else {
+          acc.push({ keyword, count });
+        }
+      });
+    }
+    return acc;
+  }, []).sort((a, b) => b.count - a.count).slice(0, 15);
 
   return (
     <div className="space-y-8">
@@ -239,6 +259,47 @@ export const YouTubeAnalytics = () => {
             </div>
           </DashboardCard>
         </div>
+
+        {/* Add the new Keyword Analysis chart at the bottom */}
+        <DashboardCard title="Keyword Analysis">
+          <div className="w-full h-[400px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={keywordData}
+                margin={{
+                  top: 20,
+                  right: 30,
+                  left: 20,
+                  bottom: 120,
+                }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                  dataKey="keyword"
+                  angle={-45}
+                  textAnchor="end"
+                  height={100}
+                  interval={0}
+                />
+                <YAxis />
+                <Tooltip />
+                <Bar
+                  dataKey="count"
+                  fill="#8884d8"
+                  name="Occurrences"
+                  radius={[4, 4, 0, 0]}
+                >
+                  {keywordData.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={`hsl(${(index * 360) / keywordData.length}, 70%, 60%)`}
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </DashboardCard>
       </div>
     </div>
   );

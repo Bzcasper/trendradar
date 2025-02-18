@@ -20,6 +20,54 @@ interface VideoStats {
   };
 }
 
+// Function to extract and analyze keywords
+function extractKeywords(title: string, description: string): { keyword: string, count: number }[] {
+  const stopWords = new Set(['the', 'be', 'to', 'of', 'and', 'a', 'in', 'that', 'have', 'i', 'it', 'for', 'not', 'on', 'with', 'he', 'as', 'you', 'do', 'at']);
+  const combined = `${title} ${description}`.toLowerCase();
+  const words = combined.match(/\b\w+\b/g) || [];
+  
+  const keywordCount = new Map<string, number>();
+  words.forEach(word => {
+    if (!stopWords.has(word) && word.length > 2) {
+      keywordCount.set(word, (keywordCount.get(word) || 0) + 1);
+    }
+  });
+  
+  return Array.from(keywordCount.entries())
+    .map(([keyword, count]) => ({ keyword, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 20); // Top 20 keywords
+}
+
+// Implement RSI calculation from Part 2
+function calculateRSI(viewHistory: number[]): number {
+  if (viewHistory.length < 2) return 50;
+  
+  let gains = 0;
+  let losses = 0;
+  
+  for (let i = 1; i < viewHistory.length; i++) {
+    const difference = viewHistory[i] - viewHistory[i - 1];
+    if (difference > 0) {
+      gains += difference;
+    } else {
+      losses -= difference;
+    }
+  }
+  
+  const avgGain = gains / viewHistory.length;
+  const avgLoss = losses / viewHistory.length;
+  
+  if (avgLoss === 0) return 100;
+  const rs = avgGain / avgLoss;
+  return 100 - (100 / (1 + rs));
+}
+
+// Calculate relative volume from Part 2
+function calculateRelativeVolume(currentVolume: number, averageVolume: number): number {
+  return averageVolume > 0 ? currentVolume / averageVolume : 1;
+}
+
 // Function to categorize content using OpenAI
 async function categorizeContent(title: string, description: string): Promise<string> {
   const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
@@ -119,6 +167,41 @@ const calculateTrendingScore = (
   );
 };
 
+// Enhanced trending score calculation incorporating both Part 1 and Part 2
+function calculateEnhancedTrendingScore(
+  viewVelocity: number,
+  engagementRate: number,
+  audienceRetention: number,
+  trendAcceleration: number,
+  movingAverage: number,
+  rsi: number,
+  relativeVolume: number,
+  fiboLevel: number
+): number {
+  // Weights from both parts of the algorithm
+  const weights = {
+    viewVelocity: 0.2,
+    engagementRate: 0.15,
+    audienceRetention: 0.1,
+    trendAcceleration: 0.15,
+    movingAverage: 0.1,
+    rsi: 0.1,
+    relativeVolume: 0.1,
+    fiboLevel: 0.1
+  };
+
+  return (
+    weights.viewVelocity * viewVelocity +
+    weights.engagementRate * engagementRate +
+    weights.audienceRetention * audienceRetention +
+    weights.trendAcceleration * trendAcceleration +
+    weights.movingAverage * movingAverage +
+    weights.rsi * rsi +
+    weights.relativeVolume * relativeVolume +
+    weights.fiboLevel * fiboLevel
+  );
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -172,27 +255,42 @@ Deno.serve(async (req) => {
         const comments = parseInt(stats.statistics.commentCount || '0')
         const publishedAt = item.snippet.publishedAt
 
-        // Get AI-powered categorization
+        // Enhanced analysis using both parts of the algorithm
+        const viewHistory = [views * 0.7, views * 0.8, views * 0.9, views]; // Simplified history
+        const rsi = calculateRSI(viewHistory);
+        const averageViews = viewHistory.reduce((a, b) => a + b, 0) / viewHistory.length;
+        const relativeVolume = calculateRelativeVolume(views, averageViews);
+        const fiboLevel = 61.8; // Using golden ratio as default
+
+        // Get AI categorization
         const aiCategory = await categorizeContent(
           item.snippet.title,
           item.snippet.description
         );
 
-        // Calculate metrics
-        const viewVelocity = calculateViewVelocity(views, publishedAt)
-        const engagementRate = calculateEngagementRate(likes, comments, views)
-        const audienceRetention = 50 // Placeholder
-        const trendAcceleration = calculateTrendAcceleration(viewVelocity, viewVelocity * 0.8)
-        const movingAverage = calculateMovingAverage(viewVelocity, [viewVelocity * 0.8, viewVelocity * 0.9])
-        const viralProbability = calculateViralProbability(viewVelocity, engagementRate, trendAcceleration)
-        const trendingScore = calculateTrendingScore(
+        // Extract keywords
+        const keywords = extractKeywords(
+          item.snippet.title,
+          item.snippet.description
+        );
+
+        // Calculate all metrics
+        const viewVelocity = calculateViewVelocity(views, publishedAt);
+        const engagementRate = calculateEngagementRate(likes, comments, views);
+        const audienceRetention = 50; // Placeholder
+        const trendAcceleration = calculateTrendAcceleration(viewVelocity, viewVelocity * 0.8);
+        const movingAverage = calculateMovingAverage(viewVelocity, [viewVelocity * 0.8, viewVelocity * 0.9]);
+
+        const enhancedTrendingScore = calculateEnhancedTrendingScore(
           viewVelocity,
           engagementRate,
           audienceRetention,
           trendAcceleration,
           movingAverage,
-          viralProbability
-        )
+          rsi,
+          relativeVolume,
+          fiboLevel
+        );
 
         const videoData = {
           video_id: item.id.videoId,
@@ -209,7 +307,16 @@ Deno.serve(async (req) => {
         // Store video data
         const { data: video, error: videoError } = await supabaseClient
           .from('youtube_videos')
-          .upsert(videoData, {
+          .upsert({
+            ...videoData,
+            view_velocity: viewVelocity,
+            engagement_rate: engagementRate,
+            trending_score: enhancedTrendingScore,
+            rsi,
+            relative_volume: relativeVolume,
+            fibo_level: fiboLevel,
+            keywords,
+          }, {
             onConflict: 'video_id',
             ignoreDuplicates: false,
             returning: true
@@ -228,10 +335,10 @@ Deno.serve(async (req) => {
             view_velocity: viewVelocity,
             engagement_rate: engagementRate,
             audience_retention: audienceRetention,
-            trending_score: trendingScore,
+            trending_score: enhancedTrendingScore,
             trend_acceleration: trendAcceleration,
             moving_average: movingAverage,
-            viral_probability: viralProbability,
+            viral_probability: calculateViralProbability(viewVelocity, engagementRate, trendAcceleration),
             metadata: {
               views,
               likes,
@@ -260,8 +367,11 @@ Deno.serve(async (req) => {
           ...video,
           view_velocity: viewVelocity,
           engagement_rate: engagementRate,
-          trending_score: trendingScore,
-          viral_probability: viralProbability
+          trending_score: enhancedTrendingScore,
+          rsi,
+          relative_volume: relativeVolume,
+          fibo_level: fiboLevel,
+          keywords,
         }
       })
     )
