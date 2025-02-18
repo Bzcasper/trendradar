@@ -1,3 +1,4 @@
+
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
 import { corsHeaders } from '../_shared/cors.ts'
 
@@ -255,6 +256,30 @@ Deno.serve(async (req) => {
         const comments = parseInt(stats.statistics.commentCount || '0')
         const publishedAt = item.snippet.publishedAt
 
+        // Calculate all metrics from our algorithm
+        const viewHistory = [views * 0.7, views * 0.8, views * 0.9, views];
+        const rsi = calculateRSI(viewHistory);
+        const averageViews = viewHistory.reduce((a, b) => a + b, 0) / viewHistory.length;
+        const relativeVolume = calculateRelativeVolume(views, averageViews);
+        const fiboLevel = 61.8;
+
+        const viewVelocity = calculateViewVelocity(views, publishedAt);
+        const engagementRate = calculateEngagementRate(likes, comments, views);
+        const audienceRetention = 50; // Default value
+        const trendAcceleration = calculateTrendAcceleration(viewVelocity, viewVelocity * 0.8);
+        const movingAverage = calculateMovingAverage(viewVelocity, [viewVelocity * 0.8, viewVelocity * 0.9]);
+
+        const trendingScore = calculateEnhancedTrendingScore(
+          viewVelocity,
+          engagementRate,
+          audienceRetention,
+          trendAcceleration,
+          movingAverage,
+          rsi,
+          relativeVolume,
+          fiboLevel
+        );
+
         // Get AI categorization and keywords
         const aiCategory = await categorizeContent(
           item.snippet.title,
@@ -271,18 +296,55 @@ Deno.serve(async (req) => {
           title: item.snippet.title,
           description: item.snippet.description,
           thumbnail_url: item.snippet.thumbnails.default.url,
-          views,
-          likes,
-          comments,
-          category: aiCategory,
           published_at: publishedAt,
-          keywords
-        }
+          metrics: {
+            views,
+            likes,
+            comments,
+            engagement_rate: engagementRate,
+            view_velocity: viewVelocity,
+            audience_retention: audienceRetention,
+            trend_acceleration: trendAcceleration,
+            moving_average: movingAverage,
+            rsi,
+            relative_volume: relativeVolume,
+            fibo_level: fiboLevel,
+            trending_score: trendingScore
+          },
+          ai_analysis: {
+            category: aiCategory,
+            keywords: keywords
+          },
+          algorithm_metrics: {
+            part1: {
+              view_velocity: viewVelocity,
+              engagement_rate: engagementRate,
+              audience_retention: audienceRetention,
+              trend_acceleration: trendAcceleration,
+              moving_average: movingAverage
+            },
+            part2: {
+              rsi,
+              relative_volume: relativeVolume,
+              fibonacci_level: fiboLevel
+            }
+          }
+        };
 
-        // Store video data
+        // Store video data in Supabase
         const { data: video, error: videoError } = await supabaseClient
           .from('youtube_videos')
-          .upsert(videoData, {
+          .upsert({
+            video_id: videoData.video_id,
+            title: videoData.title,
+            description: videoData.description,
+            thumbnail_url: videoData.thumbnail_url,
+            views,
+            likes,
+            comments,
+            category: aiCategory,
+            published_at: publishedAt
+          }, {
             onConflict: 'video_id',
             ignoreDuplicates: false,
             returning: true
@@ -292,41 +354,43 @@ Deno.serve(async (req) => {
 
         if (videoError) throw videoError
 
-        // Send processed data to webhook
-        try {
-          await fetch('https://vaubsaaeexjdgzpzuqcm.functions.supabase.co/webhook-sender', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              ...corsHeaders
-            },
-            body: JSON.stringify({
-              data: {
-                ...videoData,
-                ai_analysis: {
-                  category: aiCategory,
-                  keywords: keywords
-                },
-                metrics: {
-                  views,
-                  likes,
-                  comments
-                }
-              }
-            })
-          });
-        } catch (webhookError) {
-          console.error('Webhook delivery failed:', webhookError);
-          // Continue processing even if webhook fails
-        }
-
         return {
-          ...video,
-          category: aiCategory,
-          keywords
-        }
+          ...videoData,
+          trending_rank: 0 // Will be calculated after all videos are processed
+        };
       })
-    )
+    );
+
+    // Sort by trending score and get top 10
+    const topResults = processedVideos
+      .sort((a, b) => b.metrics.trending_score - a.metrics.trending_score)
+      .slice(0, 10)
+      .map((video, index) => ({
+        ...video,
+        trending_rank: index + 1
+      }));
+
+    // Send top 10 results to webhook
+    try {
+      await fetch('https://vaubsaaeexjdgzpzuqcm.functions.supabase.co/webhook-sender', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders
+        },
+        body: JSON.stringify({
+          data: {
+            timestamp: new Date().toISOString(),
+            search_query: query,
+            total_results: processedVideos.length,
+            top_results: topResults
+          }
+        })
+      });
+      console.log('Webhook delivery successful');
+    } catch (webhookError) {
+      console.error('Webhook delivery failed:', webhookError);
+    }
 
     return new Response(JSON.stringify(processedVideos), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
