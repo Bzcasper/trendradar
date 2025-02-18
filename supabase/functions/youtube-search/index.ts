@@ -283,13 +283,38 @@ function calculateEnhancedTrendingScore(
   );
 }
 
-async function getVideoAnalytics(videoId: string): Promise<AnalyticsData | null> {
+async function getAccessToken(): Promise<string | null> {
   const YOUTUBE_CLIENT_ID = Deno.env.get('YOUTUBE_CLIENT_ID');
   const YOUTUBE_CLIENT_SECRET = Deno.env.get('YOUTUBE_CLIENT_SECRET');
   
   try {
-    // This is a simplified version. In production, you'd need to handle OAuth2 flow
-    // and token refresh properly
+    const response = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        client_id: YOUTUBE_CLIENT_ID!,
+        client_secret: YOUTUBE_CLIENT_SECRET!,
+        grant_type: 'client_credentials',
+        scope: 'https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/yt-analytics.readonly'
+      })
+    });
+
+    const data = await response.json();
+    return data.access_token || null;
+  } catch (error) {
+    console.error('Error getting access token:', error);
+    return null;
+  }
+}
+
+async function getVideoAnalytics(videoId: string, accessToken: string): Promise<AnalyticsData | null> {
+  try {
+    const now = new Date();
+    const startDate = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0]; // 30 days ago
+    const endDate = now.toISOString().split('T')[0];
+
     const analyticsResponse = await fetch(
       `https://youtubeanalytics.googleapis.com/v2/reports?` +
       `dimensions=video` +
@@ -299,17 +324,22 @@ async function getVideoAnalytics(videoId: string): Promise<AnalyticsData | null>
       `annotationClickThroughRate,annotationCloseRate,annotationImpressions,` +
       `cardClickRate,cardImpressions,cardClicks` +
       `&filters=video==${videoId}` +
-      `&startDate=1970-01-01` +
-      `&endDate=2050-12-31`,
+      `&startDate=${startDate}` +
+      `&endDate=${endDate}`,
       {
         headers: {
-          Authorization: `Bearer ${YOUTUBE_CLIENT_SECRET}`,
+          Authorization: `Bearer ${accessToken}`,
+          Accept: 'application/json'
         }
       }
     );
 
+    if (!analyticsResponse.ok) {
+      throw new Error(`Analytics API error: ${analyticsResponse.statusText}`);
+    }
+
     const data = await analyticsResponse.json();
-    return data.rows[0] || null;
+    return data.rows?.[0] || null;
   } catch (error) {
     console.error('Error fetching analytics:', error);
     return null;
@@ -322,14 +352,19 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const YOUTUBE_API_KEY = Deno.env.get('YOUTUBE_API_KEY')
+    const YOUTUBE_API_KEY = Deno.env.get('YOUTUBE_API_KEY');
     if (!YOUTUBE_API_KEY) {
-      throw new Error('Missing YouTube API key')
+      throw new Error('Missing YouTube API key');
     }
 
-    const { query } = await req.json()
+    const accessToken = await getAccessToken();
+    if (!accessToken) {
+      console.warn('Could not get OAuth access token, analytics data will be limited');
+    }
+
+    const { query } = await req.json();
     if (!query) {
-      throw new Error('Search query is required')
+      throw new Error('Search query is required');
     }
 
     const supabaseClient = createClient(
@@ -337,7 +372,7 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Initial search request with more parts
+    // Initial search request
     const searchResponse = await fetch(
       `https://www.googleapis.com/youtube/v3/search?` +
       `part=snippet` +
@@ -345,11 +380,12 @@ Deno.serve(async (req) => {
       `&type=video` +
       `&maxResults=50` +
       `&key=${YOUTUBE_API_KEY}`
-    )
-    const searchData = await searchResponse.json()
+    );
+
+    const searchData = await searchResponse.json();
 
     if (!searchData.items) {
-      throw new Error('No results found')
+      throw new Error('No results found');
     }
 
     const { data: queryData, error: queryError } = await supabaseClient
@@ -368,18 +404,20 @@ Deno.serve(async (req) => {
           `part=snippet,contentDetails,statistics,status,topicDetails` +
           `&id=${item.id.videoId}` +
           `&key=${YOUTUBE_API_KEY}`
-        )
-        const detailsData = await detailsResponse.json()
-        const videoDetails = detailsData.items[0]
+        );
+        const detailsData = await detailsResponse.json();
+        const videoDetails = detailsData.items[0];
 
-        // Get analytics data
-        const analyticsData = await getVideoAnalytics(item.id.videoId);
+        // Get analytics data if we have access token
+        const analyticsData = accessToken ? 
+          await getVideoAnalytics(item.id.videoId, accessToken) : 
+          null;
 
         // Calculate metrics from algorithm
-        const views = parseInt(videoDetails.statistics.viewCount || '0')
-        const likes = parseInt(videoDetails.statistics.likeCount || '0')
-        const comments = parseInt(videoDetails.statistics.commentCount || '0')
-        const publishedAt = item.snippet.publishedAt
+        const views = parseInt(videoDetails.statistics.viewCount || '0');
+        const likes = parseInt(videoDetails.statistics.likeCount || '0');
+        const comments = parseInt(videoDetails.statistics.commentCount || '0');
+        const publishedAt = item.snippet.publishedAt;
         
         // Calculate all metrics from our algorithm
         const viewHistory = [views * 0.7, views * 0.8, views * 0.9, views];
@@ -390,7 +428,7 @@ Deno.serve(async (req) => {
 
         const viewVelocity = calculateViewVelocity(views, publishedAt);
         const engagementRate = calculateEngagementRate(likes, comments, views);
-        const audienceRetention = analyticsData?.averageViewPercentage || 50; // Default value
+        const audienceRetention = analyticsData?.averageViewPercentage || 50;
         const trendAcceleration = calculateTrendAcceleration(viewVelocity, viewVelocity * 0.8);
         const movingAverage = calculateMovingAverage(viewVelocity, [viewVelocity * 0.8, viewVelocity * 0.9]);
 
@@ -439,30 +477,29 @@ Deno.serve(async (req) => {
             comments,
             engagement_rate: engagementRate,
             view_velocity: viewVelocity,
-            audience_retention: analyticsData?.averageViewPercentage || 50,
             trend_acceleration: trendAcceleration,
             moving_average: movingAverage,
             rsi,
             relative_volume: relativeVolume,
             fibo_level: fiboLevel,
             trending_score: trendingScore,
-            analytics_metrics: {
-              estimated_minutes_watched: analyticsData?.estimatedMinutesWatched || 0,
-              average_view_duration: analyticsData?.averageViewDuration || 0,
-              subscribers_gained: analyticsData?.subscribersGained || 0,
-              subscribers_lost: analyticsData?.subscribersLost || 0,
-              shares: analyticsData?.shares || 0,
+            analytics_metrics: analyticsData ? {
+              estimated_minutes_watched: analyticsData.estimatedMinutesWatched || 0,
+              average_view_duration: analyticsData.averageViewDuration || 0,
+              subscribers_gained: analyticsData.subscribersGained || 0,
+              subscribers_lost: analyticsData.subscribersLost || 0,
+              shares: analyticsData.shares || 0,
               annotation_metrics: {
-                ctr: analyticsData?.annotationClickThroughRate || 0,
-                close_rate: analyticsData?.annotationCloseRate || 0,
-                impressions: analyticsData?.annotationImpressions || 0
+                ctr: analyticsData.annotationClickThroughRate || 0,
+                close_rate: analyticsData.annotationCloseRate || 0,
+                impressions: analyticsData.annotationImpressions || 0
               },
               card_metrics: {
-                ctr: analyticsData?.cardClickRate || 0,
-                impressions: analyticsData?.cardImpressions || 0,
-                clicks: analyticsData?.cardClicks || 0
+                ctr: analyticsData.cardClickRate || 0,
+                impressions: analyticsData.cardImpressions || 0,
+                clicks: analyticsData.cardClicks || 0
               }
-            }
+            } : null
           },
           ai_analysis: {
             category: aiAnalysis.category,
@@ -473,7 +510,7 @@ Deno.serve(async (req) => {
             part1: {
               view_velocity: viewVelocity,
               engagement_rate: engagementRate,
-              audience_retention: analyticsData?.averageViewPercentage || 50,
+              audience_retention: audienceRetention,
               trend_acceleration: trendAcceleration,
               moving_average: movingAverage
             },
@@ -485,7 +522,7 @@ Deno.serve(async (req) => {
           }
         };
 
-        // Store in Supabase (simplified for readability)
+        // Store in Supabase
         const { error: videoError } = await supabaseClient
           .from('youtube_videos')
           .upsert({
