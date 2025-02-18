@@ -1,4 +1,3 @@
-
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
 import { corsHeaders } from '../_shared/cors.ts'
 
@@ -21,10 +20,85 @@ interface VideoStats {
   };
 }
 
-// Function to extract and analyze keywords
+// Constants for token and text limits
+const MAX_TITLE_LENGTH = 100;
+const MAX_DESCRIPTION_LENGTH = 500;
+const MAX_KEYWORDS = 15;
+
+// Function to sanitize text by removing special characters
+function sanitizeText(text: string): string {
+  return text
+    .replace(/[^\w\s-]/g, '') // Remove special characters except spaces and hyphens
+    .replace(/\s+/g, ' ')     // Replace multiple spaces with single space
+    .trim();
+}
+
+// Function to truncate text to token limit
+function truncateToTokenLimit(text: string, limit: number): string {
+  return text.length > limit ? text.substring(0, limit) + '...' : text;
+}
+
+// Enhanced categorization function with optimized prompt
+async function categorizeContent(title: string, description: string): Promise<string> {
+  const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+  
+  const sanitizedTitle = sanitizeText(title);
+  const sanitizedDescription = sanitizeText(description);
+  
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: `You are a content optimization expert. Analyze the video title and description to:
+1. Categorize into ONE of: Technology, Gaming, Education, Entertainment, Music, Sports, News, Lifestyle, Business, Science, Arts, Travel
+2. Create an SEO-optimized title (max 60 chars)
+3. Write a clear, engaging one-sentence summary (max 150 chars)
+4. Extract key themes and topics
+
+Respond in JSON format only:
+{
+  "category": "category_name",
+  "optimized_title": "seo_friendly_title",
+  "summary": "one_sentence_summary",
+  "themes": ["theme1", "theme2"]
+}`
+          },
+          {
+            role: 'user',
+            content: `Title: ${sanitizedTitle}\nDescription: ${sanitizedDescription}`
+          }
+        ],
+        temperature: 0.3,
+        max_tokens: 250
+      }),
+    });
+
+    const data = await response.json();
+    const result = JSON.parse(data.choices[0].message.content);
+    return result;
+  } catch (error) {
+    console.error('Error categorizing content:', error);
+    return {
+      category: 'Uncategorized',
+      optimized_title: sanitizedTitle,
+      summary: truncateToTokenLimit(sanitizedDescription, 150),
+      themes: []
+    };
+  }
+}
+
+// Enhanced keyword extraction with token limits
 function extractKeywords(title: string, description: string): { keyword: string, count: number }[] {
   const stopWords = new Set(['the', 'be', 'to', 'of', 'and', 'a', 'in', 'that', 'have', 'i', 'it', 'for', 'not', 'on', 'with', 'he', 'as', 'you', 'do', 'at']);
-  const combined = `${title} ${description}`.toLowerCase();
+  const combined = `${sanitizeText(title)} ${sanitizeText(description)}`.toLowerCase();
   const words = combined.match(/\b\w+\b/g) || [];
   
   const keywordCount = new Map<string, number>();
@@ -37,7 +111,7 @@ function extractKeywords(title: string, description: string): { keyword: string,
   return Array.from(keywordCount.entries())
     .map(([keyword, count]) => ({ keyword, count }))
     .sort((a, b) => b.count - a.count)
-    .slice(0, 20); // Top 20 keywords
+    .slice(0, MAX_KEYWORDS);
 }
 
 // Implement RSI calculation from Part 2
@@ -67,54 +141,6 @@ function calculateRSI(viewHistory: number[]): number {
 // Calculate relative volume from Part 2
 function calculateRelativeVolume(currentVolume: number, averageVolume: number): number {
   return averageVolume > 0 ? currentVolume / averageVolume : 1;
-}
-
-// Function to categorize content using OpenAI
-async function categorizeContent(title: string, description: string): Promise<string> {
-  const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-  
-  try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: `You are a content categorization expert. Analyze the video title and description and return ONLY ONE of the following categories:
-              - Technology
-              - Gaming
-              - Education
-              - Entertainment
-              - Music
-              - Sports
-              - News
-              - Lifestyle
-              - Business
-              - Science
-              - Arts
-              - Travel
-              Return ONLY the category name, nothing else.`
-          },
-          {
-            role: 'user',
-            content: `Title: ${title}\nDescription: ${description}`
-          }
-        ],
-        temperature: 0.3, // Lower temperature for more consistent categorization
-      }),
-    });
-
-    const data = await response.json();
-    return data.choices[0].message.content.trim();
-  } catch (error) {
-    console.error('Error categorizing content:', error);
-    return 'Uncategorized';
-  }
 }
 
 // Calculate view velocity
@@ -280,8 +306,8 @@ Deno.serve(async (req) => {
           fiboLevel
         );
 
-        // Get AI categorization and keywords
-        const aiCategory = await categorizeContent(
+        // Get AI analysis with optimized content
+        const aiAnalysis = await categorizeContent(
           item.snippet.title,
           item.snippet.description
         );
@@ -293,8 +319,10 @@ Deno.serve(async (req) => {
 
         const videoData = {
           video_id: item.id.videoId,
-          title: item.snippet.title,
-          description: item.snippet.description,
+          title: aiAnalysis.optimized_title,
+          original_title: item.snippet.title,
+          description: aiAnalysis.summary,
+          original_description: item.snippet.description,
           thumbnail_url: item.snippet.thumbnails.default.url,
           published_at: publishedAt,
           metrics: {
@@ -312,7 +340,8 @@ Deno.serve(async (req) => {
             trending_score: trendingScore
           },
           ai_analysis: {
-            category: aiCategory,
+            category: aiAnalysis.category,
+            themes: aiAnalysis.themes,
             keywords: keywords
           },
           algorithm_metrics: {
@@ -342,7 +371,7 @@ Deno.serve(async (req) => {
             views,
             likes,
             comments,
-            category: aiCategory,
+            category: aiAnalysis.category,
             published_at: publishedAt
           }, {
             onConflict: 'video_id',
@@ -354,23 +383,23 @@ Deno.serve(async (req) => {
 
         if (videoError) throw videoError
 
-        return {
-          ...videoData,
-          trending_rank: 0 // Will be calculated after all videos are processed
-        };
+        return videoData;
       })
     );
 
-    // Sort by trending score and get top 10
+    // Sort and prepare top 10 results for webhook
     const topResults = processedVideos
       .sort((a, b) => b.metrics.trending_score - a.metrics.trending_score)
       .slice(0, 10)
       .map((video, index) => ({
         ...video,
-        trending_rank: index + 1
+        trending_rank: index + 1,
+        title: video.title,             // Using optimized title
+        description: video.description, // Using optimized description
+        themes: video.ai_analysis.themes
       }));
 
-    // Send top 10 results to webhook
+    // Send optimized data to webhook
     try {
       await fetch('https://vaubsaaeexjdgzpzuqcm.functions.supabase.co/webhook-sender', {
         method: 'POST',
@@ -394,11 +423,5 @@ Deno.serve(async (req) => {
 
     return new Response(JSON.stringify(processedVideos), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
-  } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 400,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
-  }
-})
+    });
+});
