@@ -1,25 +1,29 @@
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
-import { corsHeaders } from '../_shared/cors.ts'
+// @ts-ignore
+import { corsHeaders } from '../_shared/cors.ts';
+
+console.log('Edge function starting...');
 
 const CLIENT_ID = Deno.env.get('YOUTUBE_CLIENT_ID');
 const CLIENT_SECRET = Deno.env.get('YOUTUBE_CLIENT_SECRET');
-const REDIRECT_URI = 'https://a4df1979-e2d6-4bf8-9ddc-2c5daa66f295.lovableproject.com/auth/callback'; // Updated for Lovable preview URL
+const REDIRECT_URI = 'https://a4df1979-e2d6-4bf8-9ddc-2c5daa66f295.lovableproject.com/auth/callback';
 
-// Create the OAuth 2.0 URL
 function createAuthUrl() {
+  console.log('Creating auth URL...');
   const scope = encodeURIComponent('https://www.googleapis.com/auth/youtube.readonly');
-  return `https://accounts.google.com/o/oauth2/v2/auth?` +
+  const url = `https://accounts.google.com/o/oauth2/v2/auth?` +
     `client_id=${CLIENT_ID}&` +
     `redirect_uri=${encodeURIComponent(REDIRECT_URI)}&` +
     `response_type=code&` +
     `scope=${scope}&` +
     `access_type=offline&` +
     `prompt=consent`;
+  console.log('Auth URL created (domain):', new URL(url).origin);
+  return url;
 }
 
-// Exchange code for tokens
 async function exchangeCodeForTokens(code: string) {
+  console.log('Exchanging code for tokens...');
   const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
     headers: {
@@ -40,71 +44,87 @@ async function exchangeCodeForTokens(code: string) {
     throw new Error('Failed to exchange code for tokens');
   }
 
+  console.log('Tokens received successfully');
   return tokenResponse.json();
 }
 
-// Handle requests
 Deno.serve(async (req) => {
-  // Handle CORS preflight requests
+  console.log('Received request:', req.method);
+  
+  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
-    return new Response(null, { 
-      headers: corsHeaders 
+    console.log('Handling CORS preflight request');
+    return new Response(null, {
+      status: 204,
+      headers: corsHeaders
     });
   }
 
   try {
+    // Validate credentials
     if (!CLIENT_ID || !CLIENT_SECRET) {
+      console.error('Missing OAuth credentials');
       throw new Error('Missing OAuth credentials');
     }
 
-    console.log('Processing request:', req.method); // Add logging
+    // Parse request body
+    let body;
+    try {
+      body = await req.json();
+      console.log('Request body action:', body.action);
+    } catch (e) {
+      console.error('Failed to parse request body:', e);
+      throw new Error('Invalid request body');
+    }
 
-    const { action, code } = await req.json();
-    console.log('Request payload:', { action, code: code ? '[REDACTED]' : undefined }); // Add logging
+    const { action, code } = body;
 
     if (action === 'login') {
-      // Generate auth URL for initial login
+      console.log('Processing login action');
       const authUrl = createAuthUrl();
-      console.log('Generated auth URL (domain only):', new URL(authUrl).origin); // Log only the domain for security
-      
       return new Response(
         JSON.stringify({ authUrl }),
         { 
-          headers: { 
+          status: 200,
+          headers: {
             ...corsHeaders,
             'Content-Type': 'application/json'
-          } 
+          }
         }
       );
-    } else if (action === 'callback' && code) {
-      // Exchange code for tokens
-      console.log('Processing callback with code'); // Add logging
+    } 
+    
+    if (action === 'callback' && code) {
+      console.log('Processing callback action');
       const tokens = await exchangeCodeForTokens(code);
-      console.log('Tokens received successfully'); // Add logging
-      
       return new Response(
         JSON.stringify(tokens),
         { 
-          headers: { 
+          status: 200,
+          headers: {
             ...corsHeaders,
             'Content-Type': 'application/json'
-          } 
+          }
         }
       );
-    } else {
-      throw new Error('Invalid action');
     }
 
+    console.error('Invalid action requested:', action);
+    throw new Error('Invalid action');
+
   } catch (error) {
-    console.error('Auth error:', error); // Add error logging
+    console.error('Error in edge function:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        details: error.stack
+      }),
       { 
-        status: 400, 
-        headers: { 
+        status: 400,
+        headers: {
           ...corsHeaders,
           'Content-Type': 'application/json'
-        } 
+        }
       }
     );
   }
