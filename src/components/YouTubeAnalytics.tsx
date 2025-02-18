@@ -44,7 +44,12 @@ export const YouTubeAnalytics = () => {
         body: { query }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Search error:', error);
+        throw error;
+      }
+
+      console.log('Search results:', data); // Add logging
       setSearchResults(data);
       
       toast({

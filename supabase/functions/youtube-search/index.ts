@@ -49,7 +49,9 @@ Deno.serve(async (req) => {
     );
 
     if (!searchResponse.ok) {
-      throw new Error(`YouTube API error: ${searchResponse.statusText}`);
+      const errorData = await searchResponse.json();
+      console.error('YouTube API error:', errorData);
+      throw new Error(`YouTube API error: ${errorData?.error?.message || searchResponse.statusText}`);
     }
 
     const searchData = await searchResponse.json();
