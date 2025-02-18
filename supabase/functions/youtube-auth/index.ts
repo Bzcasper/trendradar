@@ -4,7 +4,7 @@ import { corsHeaders } from '../_shared/cors.ts'
 
 const CLIENT_ID = Deno.env.get('YOUTUBE_CLIENT_ID');
 const CLIENT_SECRET = Deno.env.get('YOUTUBE_CLIENT_SECRET');
-const REDIRECT_URI = 'http://localhost:8080/auth/callback'; // Update this for production
+const REDIRECT_URI = 'https://a4df1979-e2d6-4bf8-9ddc-2c5daa66f295.lovableproject.com/auth/callback'; // Updated for Lovable preview URL
 
 // Create the OAuth 2.0 URL
 function createAuthUrl() {
@@ -47,7 +47,9 @@ async function exchangeCodeForTokens(code: string) {
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { 
+      headers: corsHeaders 
+    });
   }
 
   try {
@@ -55,33 +57,54 @@ Deno.serve(async (req) => {
       throw new Error('Missing OAuth credentials');
     }
 
+    console.log('Processing request:', req.method); // Add logging
+
     const { action, code } = await req.json();
+    console.log('Request payload:', { action, code: code ? '[REDACTED]' : undefined }); // Add logging
 
     if (action === 'login') {
       // Generate auth URL for initial login
       const authUrl = createAuthUrl();
+      console.log('Generated auth URL (domain only):', new URL(authUrl).origin); // Log only the domain for security
+      
       return new Response(
         JSON.stringify({ authUrl }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { 
+          headers: { 
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          } 
+        }
       );
     } else if (action === 'callback' && code) {
       // Exchange code for tokens
+      console.log('Processing callback with code'); // Add logging
       const tokens = await exchangeCodeForTokens(code);
+      console.log('Tokens received successfully'); // Add logging
+      
       return new Response(
         JSON.stringify(tokens),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { 
+          headers: { 
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          } 
+        }
       );
     } else {
       throw new Error('Invalid action');
     }
 
   } catch (error) {
-    console.error('Auth error:', error);
+    console.error('Auth error:', error); // Add error logging
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
         status: 400, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        headers: { 
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        } 
       }
     );
   }
