@@ -6,6 +6,8 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Ba
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "./ui/use-toast";
 import { format } from "date-fns";
+import { useYouTubeAuth } from "@/contexts/YouTubeAuthContext";
+import { Button } from "./ui/button";
 
 interface VideoResult {
   id: string;
@@ -36,8 +38,18 @@ export const YouTubeAnalytics = () => {
   const [searchResults, setSearchResults] = useState<VideoResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { isAuthenticated, login, logout } = useYouTubeAuth();
 
   const handleSearch = async (query: string) => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Authentication Required",
+        description: "Please connect your YouTube account first",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('youtube-search', {
@@ -49,7 +61,7 @@ export const YouTubeAnalytics = () => {
         throw error;
       }
 
-      console.log('Search results:', data); // Add logging
+      console.log('Search results:', data);
       setSearchResults(data);
       
       toast({
@@ -112,6 +124,18 @@ export const YouTubeAnalytics = () => {
 
   return (
     <div className="space-y-8">
+      <div className="flex justify-end mb-4">
+        {isAuthenticated ? (
+          <Button onClick={logout} variant="outline">
+            Disconnect YouTube
+          </Button>
+        ) : (
+          <Button onClick={login}>
+            Connect YouTube Account
+          </Button>
+        )}
+      </div>
+      
       <SearchBox onSearch={handleSearch} isLoading={isLoading} />
       
       <div className="grid grid-cols-1 gap-8">
