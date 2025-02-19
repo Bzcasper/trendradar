@@ -883,27 +883,39 @@ export type Database = {
         }
         Relationships: []
       }
-      table_name: {
+      todolist: {
         Row: {
-          data: Json | null
+          created_at: string | null
+          description: string | null
+          due_date: string | null
           id: number
-          inserted_at: string
-          name: string | null
-          updated_at: string
+          priority: string
+          status: string
+          title: string
+          updated_at: string | null
+          user_id: string | null
         }
         Insert: {
-          data?: Json | null
-          id?: number
-          inserted_at?: string
-          name?: string | null
-          updated_at?: string
+          created_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: never
+          priority?: string
+          status?: string
+          title: string
+          updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
-          data?: Json | null
-          id?: number
-          inserted_at?: string
-          name?: string | null
-          updated_at?: string
+          created_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: never
+          priority?: string
+          status?: string
+          title?: string
+          updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -1625,6 +1637,17 @@ export type Database = {
           comments: number
         }
         Returns: number
+      }
+      checkprocessingstatistics: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          status: string
+          count: number
+        }[]
+      }
+      createinitialtasks: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       custom_access_token_hook: {
         Args: {
