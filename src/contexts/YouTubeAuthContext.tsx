@@ -18,7 +18,6 @@ export function YouTubeAuthProvider({ children }: { children: React.ReactNode })
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check for existing token in localStorage
     const token = localStorage.getItem('youtube_access_token');
     if (token) {
       setAccessToken(token);
@@ -28,21 +27,48 @@ export function YouTubeAuthProvider({ children }: { children: React.ReactNode })
 
   const login = async () => {
     try {
-      console.log('Initiating YouTube login');
+      console.log('Initiating YouTube login...');
+
+      // First check if the function endpoint is accessible
+      const functionUrl = `${supabase.functions.url}/youtube-auth`;
+      console.log('Function URL:', functionUrl);
+
       const { data, error } = await supabase.functions.invoke('youtube-auth', {
-        body: { 
-          action: 'login' 
-        },
+        method: 'POST',
+        body: { action: 'login' },
         headers: {
-          'Content-Type': 'application/json'
-        }
+          prefer: 'return=minimal',
+          'Content-Type': 'application/json',
+        },
       });
+
+      console.log('Function response:', { data, error });
 
       if (error) {
         console.error('Supabase function error:', error);
-        throw error;
+        // Try alternative direct fetch if supabase.functions.invoke fails
+        const response = await fetch(`${supabase.functions.url}/youtube-auth`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${supabase.auth.session()?.access_token}`,
+          },
+          body: JSON.stringify({ action: 'login' }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        if (result.authUrl) {
+          console.log('Redirecting to auth URL:', result.authUrl);
+          window.location.href = result.authUrl;
+          return;
+        }
+        throw new Error('No auth URL received');
       }
-      
+
       if (data?.authUrl) {
         console.log('Redirecting to auth URL:', data.authUrl);
         window.location.href = data.authUrl;
@@ -56,7 +82,6 @@ export function YouTubeAuthProvider({ children }: { children: React.ReactNode })
         description: error instanceof Error ? error.message : "An unexpected error occurred",
         variant: "destructive",
       });
-      throw error;
     }
   };
 
