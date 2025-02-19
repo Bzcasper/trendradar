@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, BarChart3, Zap, Network2, ThumbsUp } from "lucide-react";
+import { ArrowRight, BarChart3, Zap, Network, ThumbsUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function Home() {
@@ -118,7 +118,7 @@ export default function Home() {
             </div>
             <div className="p-6 rounded-lg border border-gray-200 hover:shadow-lg transition-shadow">
               <div className="mb-4">
-                <Network2 className="h-8 w-8 text-primary" />
+                <Network className="h-8 w-8 text-primary" />
               </div>
               <h3 className="text-xl font-semibold mb-2">Cross-Platform Correlation</h3>
               <p className="text-gray-600">Understand how trends connect across different content channels.</p>
