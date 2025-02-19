@@ -1,13 +1,12 @@
 
 import { serve } from "https://deno.fresh.dev/std@v9.6.1/http/server.ts";
-// @ts-ignore
 import { corsHeaders } from '../_shared/cors.ts';
 
 console.log('YouTube auth function starting...');
 
 const CLIENT_ID = Deno.env.get('YOUTUBE_CLIENT_ID');
 const CLIENT_SECRET = Deno.env.get('YOUTUBE_CLIENT_SECRET');
-const REDIRECT_URI = 'https://a4df1979-e2d6-4bf8-9ddc-2c5daa66f295.lovableproject.com/auth/callback';
+const REDIRECT_URI = 'https://trendradar.ai/auth/callback';
 
 function createAuthUrl() {
   console.log('Creating auth URL...');
@@ -53,7 +52,6 @@ async function exchangeCodeForTokens(code: string) {
 }
 
 serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, {
       status: 204,
@@ -62,13 +60,11 @@ serve(async (req) => {
   }
 
   try {
-    // Validate environment variables
     if (!CLIENT_ID || !CLIENT_SECRET) {
       console.error('Missing required environment variables');
       throw new Error('Server configuration error');
     }
 
-    // Parse request body
     let body;
     try {
       body = await req.json();
