@@ -1,84 +1,77 @@
+
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
 
 export default function AuthCallback() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { session } = useAuth();
 
   useEffect(() => {
     const handleCallback = async () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const code = urlParams.get('code');
-      const error = urlParams.get('error');
-      const error_description = urlParams.get('error_description');
-      
-      // Handle OAuth errors
-      if (error) {
-        console.error('Auth error:', error, error_description);
-        toast({
-          title: "Authentication failed",
-          description: error_description || error,
-          variant: "destructive",
-        });
-        navigate('/auth');
-        return;
-      }
-      
-      if (code) {
-        try {
-          console.log('Processing auth callback with code');
-          
-          // If we have a session, this is YouTube auth
-          if (session) {
-            const { data, error } = await supabase.functions.invoke('youtube-auth', {
-              body: { action: 'callback', code }
-            });
-
-            if (error) throw error;
-
-            // Store the access token
-            localStorage.setItem('youtube_access_token', data.access_token);
-            
-            toast({
-              title: "Successfully connected to YouTube",
-              description: "You can now use YouTube features",
-            });
-
-            // Redirect back to main page
-            navigate('/');
-          } else {
-            // Otherwise, let Supabase handle the OAuth flow
-            const { error } = await supabase.auth.exchangeCodeForSession(code);
-            if (error) throw error;
-            
-            toast({
-              title: "Successfully signed in",
-              description: "Welcome back!",
-            });
-            
-            navigate('/');
-          }
-        } catch (error) {
-          console.error('Auth callback error:', error);
+      try {
+        // Get the URL parameters
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const queryParams = new URLSearchParams(window.location.search);
+        
+        // Check for errors
+        const error = queryParams.get('error') || hashParams.get('error');
+        const errorDescription = queryParams.get('error_description') || hashParams.get('error_description');
+        
+        if (error) {
+          console.error('Auth error:', error, errorDescription);
           toast({
             title: "Authentication failed",
-            description: error.message,
+            description: errorDescription || error,
             variant: "destructive",
           });
           navigate('/auth');
+          return;
         }
-      } else {
-        console.error('No code in callback URL');
+
+        // Get the auth code from URL
+        const code = queryParams.get('code');
+        
+        if (code) {
+          console.log('Processing auth code...');
+          const { error } = await supabase.auth.exchangeCodeForSession(code);
+          
+          if (error) {
+            throw error;
+          }
+
+          console.log('Successfully authenticated');
+          toast({
+            title: "Successfully signed in",
+            description: "Welcome back!",
+          });
+          
+          navigate('/dashboard');
+        } else {
+          // If no code is present, check if we're handling a successful OAuth response
+          const accessToken = hashParams.get('access_token');
+          if (accessToken) {
+            console.log('Received access token from OAuth provider');
+            navigate('/dashboard');
+          } else {
+            console.error('No authentication code or token found');
+            navigate('/auth');
+          }
+        }
+      } catch (error) {
+        console.error('Auth callback error:', error);
+        toast({
+          title: "Authentication failed",
+          description: error instanceof Error ? error.message : "An error occurred during authentication",
+          variant: "destructive",
+        });
         navigate('/auth');
       }
     };
 
     handleCallback();
-  }, [navigate, toast, session]);
+  }, [navigate, toast]);
 
   return (
     <div className="flex items-center justify-center min-h-screen">
