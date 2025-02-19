@@ -1,8 +1,7 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, BarChart3, Zap, Network, ThumbsUp, ChevronRight } from "lucide-react";
+import { ArrowRight, Play, BarChart3, Zap, Network, ThumbsUp, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function Home() {
@@ -48,62 +47,124 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-primary-ultra-light">
+    <div className="min-h-screen bg-[#0A2349]">
       {/* Progress Bar */}
       <div 
-        className="fixed top-0 left-0 h-1 bg-primary-mid z-50 transition-all duration-300"
+        className="fixed top-0 left-0 h-1 bg-[#48D1CC] z-50 transition-all duration-300"
         style={{ width: `${scrollProgress}%` }}
       />
 
       {/* Navigation */}
-      <nav className="fixed top-0 w-full bg-primary-dark z-40">
+      <nav className="fixed top-0 w-full bg-[#0A2349]/90 backdrop-blur-sm z-40 border-b border-[#48D1CC]/10">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             <a href="/" className="text-white font-gilroy text-xl font-bold">
-              lovable.dev
+              trendradar.ai
             </a>
-            <div className="hidden md:flex space-x-8">
-              <a href="/features" className="text-white hover:text-primary-light transition-colors">Features</a>
-              <a href="/pricing" className="text-white hover:text-primary-light transition-colors">Pricing</a>
-              <a href="/about" className="text-white hover:text-primary-light transition-colors">About</a>
-              <Button 
-                onClick={() => navigate('/auth')}
-                className="bg-white text-primary-dark hover:bg-primary-light transition-all duration-200"
-              >
-                Get Started
-              </Button>
+            <div className="hidden md:flex items-center space-x-8">
+              <a href="/features" className="text-white/80 hover:text-[#48D1CC] transition-colors">Features</a>
+              <a href="/pricing" className="text-white/80 hover:text-[#48D1CC] transition-colors">Pricing</a>
+              <a href="/about" className="text-white/80 hover:text-[#48D1CC] transition-colors">About</a>
+              <div className="flex items-center space-x-4">
+                <Button 
+                  variant="ghost"
+                  onClick={() => navigate('/login')}
+                  className="text-white hover:text-[#48D1CC] hover:bg-[#48D1CC]/10"
+                >
+                  Login
+                </Button>
+                <Button 
+                  onClick={() => navigate('/auth')}
+                  className="bg-[#48D1CC] text-[#0A2349] hover:bg-[#48D1CC]/90 shadow-lg shadow-[#48D1CC]/20"
+                >
+                  Sign Up
+                </Button>
+              </div>
             </div>
           </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-32 pb-24 px-4 bg-gradient-to-bl from-primary-dark to-primary-light">
-        <div className="relative z-10 max-w-7xl mx-auto text-center">
-          <h1 className="font-gilroy text-5xl md:text-6xl font-extrabold text-white mb-6 animate-fade-up tracking-tight">
-            Navigate Tomorrow's Trends Today
-          </h1>
-          <p className="font-inter text-xl md:text-2xl mb-8 text-white/90 max-w-2xl mx-auto">
-            Crystal-clear insights that transform content strategy
-          </p>
-          <div className="space-x-4">
-            <Button 
-              size="lg"
-              onClick={() => navigate('/auth')}
-              className="bg-white text-primary-dark hover:bg-primary-light hover:scale-105 transform transition-all duration-200 border-2 border-white"
-            >
-              Discover Your Content Potential
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-            <Button 
-              variant="outline" 
-              size="lg"
-              onClick={() => navigate('/contact')}
-              className="border-2 border-white text-white hover:bg-white/10 transition-all duration-200"
-            >
-              Learn More
-            </Button>
+      <section className="relative min-h-screen pt-32 pb-24 px-4 overflow-hidden">
+        {/* Background Elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          {/* Radar Animation */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] opacity-10">
+            <div className="absolute inset-0 border-2 border-[#48D1CC]/20 rounded-full animate-pulse"></div>
+            <div className="absolute inset-8 border border-[#48D1CC]/15 rounded-full"></div>
+            <div className="absolute inset-16 border border-[#48D1CC]/10 rounded-full"></div>
+            <div className="absolute inset-24 border border-[#48D1CC]/5 rounded-full"></div>
+            {/* Radar Sweep */}
+            <div className="absolute inset-0 origin-center animate-spin duration-[4s] linear infinite">
+              <div className="h-1/2 w-1 bg-gradient-to-t from-[#48D1CC] to-transparent mx-auto"></div>
+            </div>
           </div>
+          {/* Grid Pattern */}
+          <div className="absolute inset-0" 
+               style={{
+                 backgroundImage: `radial-gradient(circle at 1px 1px, ${'#48D1CC'}08 1px, transparent 1px)`,
+                 backgroundSize: '40px 40px'
+               }}>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="relative z-10 max-w-7xl mx-auto">
+          <div className="text-center max-w-4xl mx-auto">
+            <h1 className="font-gilroy text-5xl md:text-7xl font-extrabold text-white mb-6 animate-fade-up tracking-tight leading-tight">
+              Predict Trends Before They Emerge
+            </h1>
+            <p className="font-inter text-xl md:text-2xl mb-12 text-white/80 max-w-2xl mx-auto animate-fade-up delay-100">
+              AI-powered analytics that transform content data into actionable trend predictions
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 animate-fade-up delay-200">
+              <Button 
+                size="lg"
+                onClick={() => navigate('/auth')}
+                className="w-full sm:w-auto bg-[#48D1CC] text-[#0A2349] hover:bg-[#48D1CC]/90 shadow-lg shadow-[#48D1CC]/20 text-lg px-8 py-6 h-auto"
+              >
+                Get Started Free
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+              <Button 
+                variant="outline" 
+                size="lg"
+                onClick={() => navigate('/demo')}
+                className="w-full sm:w-auto border-2 border-[#48D1CC] text-[#48D1CC] hover:bg-[#48D1CC]/10 text-lg px-8 py-6 h-auto"
+              >
+                <Play className="mr-2 h-5 w-5" />
+                Watch Demo
+              </Button>
+            </div>
+
+            {/* Trust Section */}
+            <div className="mt-24 animate-fade-up delay-300">
+              <p className="text-white/60 text-sm mb-6 uppercase tracking-wider">Trusted by leading brands</p>
+              <div className="flex flex-wrap justify-center items-center gap-8 opacity-50 grayscale">
+                {/* Replace with actual brand logos */}
+                <div className="w-32 h-12 bg-white/10 rounded"></div>
+                <div className="w-32 h-12 bg-white/10 rounded"></div>
+                <div className="w-32 h-12 bg-white/10 rounded"></div>
+                <div className="w-32 h-12 bg-white/10 rounded"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Floating Data Points */}
+        <div className="absolute inset-0 pointer-events-none">
+          {[...Array(6)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-2 h-2 bg-[#48D1CC] rounded-full animate-pulse"
+              style={{
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                animationDelay: `${i * 0.5}s`
+              }}
+            />
+          ))}
         </div>
       </section>
 
