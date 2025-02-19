@@ -4,6 +4,8 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Max-Age': '86400',
 };
 
 const YOUTUBE_CLIENT_ID = Deno.env.get('YOUTUBE_CLIENT_ID');
@@ -22,38 +24,9 @@ function createAuthUrl() {
     `prompt=consent`;
 }
 
-async function exchangeCodeForTokens(code: string) {
-  console.log('Exchanging code for tokens...');
-  try {
-    const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        client_id: YOUTUBE_CLIENT_ID!,
-        client_secret: YOUTUBE_CLIENT_SECRET!,
-        code,
-        grant_type: 'authorization_code',
-        redirect_uri: REDIRECT_URI,
-      }),
-    });
-
-    if (!tokenResponse.ok) {
-      const error = await tokenResponse.json();
-      console.error('Token exchange error:', error);
-      throw new Error('Failed to exchange code for tokens');
-    }
-
-    console.log('Tokens received successfully');
-    return tokenResponse.json();
-  } catch (error) {
-    console.error('Exchange code error:', error);
-    throw error;
-  }
-}
-
 serve(async (req) => {
+  console.log('Received request:', req.method, req.url);
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, {
@@ -63,27 +36,35 @@ serve(async (req) => {
   }
 
   try {
+    // Verify environment variables
     if (!YOUTUBE_CLIENT_ID || !YOUTUBE_CLIENT_SECRET) {
       console.error('Missing required environment variables');
-      throw new Error('Server configuration error');
+      throw new Error('YouTube API credentials not configured');
     }
 
+    // Parse request body
     let body;
     try {
       body = await req.json();
     } catch (e) {
-      console.error('Invalid request body:', e);
+      console.error('Failed to parse request body:', e);
       throw new Error('Invalid request format');
     }
 
-    const { action, code } = body;
-    console.log('Request action:', action);
+    const { action } = body;
+    console.log('Processing action:', action);
 
     if (action === 'login') {
       const authUrl = createAuthUrl();
+      console.log('Generated auth URL:', authUrl);
+      
       return new Response(
-        JSON.stringify({ authUrl }),
+        JSON.stringify({ 
+          authUrl,
+          timestamp: new Date().toISOString()
+        }),
         {
+          status: 200,
           headers: {
             ...corsHeaders,
             'Content-Type': 'application/json'
@@ -92,27 +73,16 @@ serve(async (req) => {
       );
     }
 
-    if (action === 'callback' && code) {
-      const tokens = await exchangeCodeForTokens(code);
-      return new Response(
-        JSON.stringify(tokens),
-        {
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-    }
-
-    throw new Error('Invalid action');
+    // Default error for invalid action
+    throw new Error(`Invalid action: ${action}`);
 
   } catch (error) {
-    console.error('Error in edge function:', error);
+    console.error('Edge function error:', error);
+    
     return new Response(
       JSON.stringify({
         error: error.message,
-        details: error.stack
+        timestamp: new Date().toISOString()
       }),
       {
         status: 400,

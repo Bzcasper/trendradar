@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 interface YouTubeAuthContextType {
   isAuthenticated: boolean;
@@ -30,22 +30,30 @@ export function YouTubeAuthProvider({ children }: { children: React.ReactNode })
     try {
       console.log('Initiating YouTube login');
       const { data, error } = await supabase.functions.invoke('youtube-auth', {
-        body: { action: 'login' }
+        body: { 
+          action: 'login' 
+        },
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw error;
+      }
       
       if (data?.authUrl) {
-        // Redirect to Google's OAuth consent screen
+        console.log('Redirecting to auth URL:', data.authUrl);
         window.location.href = data.authUrl;
       } else {
-        throw new Error('No auth URL received');
+        throw new Error('No auth URL received from the server');
       }
     } catch (error) {
       console.error('YouTube login error:', error);
       toast({
         title: "Failed to connect YouTube",
-        description: error.message,
+        description: error instanceof Error ? error.message : "An unexpected error occurred",
         variant: "destructive",
       });
       throw error;
@@ -66,7 +74,7 @@ export function YouTubeAuthProvider({ children }: { children: React.ReactNode })
       console.error('YouTube logout error:', error);
       toast({
         title: "Logout failed",
-        description: error.message,
+        description: error instanceof Error ? error.message : "An unexpected error occurred",
         variant: "destructive",
       });
     }
