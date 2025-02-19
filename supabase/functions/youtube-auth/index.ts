@@ -1,18 +1,20 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { corsHeaders } from '../_shared/cors.ts';
 
-console.log('YouTube auth function starting...');
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
 
-const CLIENT_ID = Deno.env.get('YOUTUBE_CLIENT_ID');
-const CLIENT_SECRET = Deno.env.get('YOUTUBE_CLIENT_SECRET');
+const YOUTUBE_CLIENT_ID = Deno.env.get('YOUTUBE_CLIENT_ID');
+const YOUTUBE_CLIENT_SECRET = Deno.env.get('YOUTUBE_CLIENT_SECRET');
 const REDIRECT_URI = 'https://trendradar.ai/auth/callback';
 
 function createAuthUrl() {
   console.log('Creating auth URL...');
   const scope = encodeURIComponent('https://www.googleapis.com/auth/youtube.readonly');
   return `https://accounts.google.com/o/oauth2/v2/auth?` +
-    `client_id=${CLIENT_ID}&` +
+    `client_id=${YOUTUBE_CLIENT_ID}&` +
     `redirect_uri=${encodeURIComponent(REDIRECT_URI)}&` +
     `response_type=code&` +
     `scope=${scope}&` +
@@ -29,8 +31,8 @@ async function exchangeCodeForTokens(code: string) {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: new URLSearchParams({
-        client_id: CLIENT_ID!,
-        client_secret: CLIENT_SECRET!,
+        client_id: YOUTUBE_CLIENT_ID!,
+        client_secret: YOUTUBE_CLIENT_SECRET!,
         code,
         grant_type: 'authorization_code',
         redirect_uri: REDIRECT_URI,
@@ -52,6 +54,7 @@ async function exchangeCodeForTokens(code: string) {
 }
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, {
       status: 204,
@@ -60,7 +63,7 @@ serve(async (req) => {
   }
 
   try {
-    if (!CLIENT_ID || !CLIENT_SECRET) {
+    if (!YOUTUBE_CLIENT_ID || !YOUTUBE_CLIENT_SECRET) {
       console.error('Missing required environment variables');
       throw new Error('Server configuration error');
     }

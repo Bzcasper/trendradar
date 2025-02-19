@@ -1,6 +1,6 @@
 
 project_id = "vaubsaaeexjdgzpzuqcm"
-[functions.youtube-search]
-verify_jwt = false
 [functions.youtube-auth]
+verify_jwt = false
+[functions.youtube-search]
 verify_jwt = false
