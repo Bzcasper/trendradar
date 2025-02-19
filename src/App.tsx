@@ -1,3 +1,4 @@
+
 import { Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 import { LoadingState } from "@/components/ui/loading-state";
