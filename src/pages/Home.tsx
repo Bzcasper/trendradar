@@ -1,8 +1,7 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Play } from "lucide-react";
+import { ArrowRight, Play, Radar, Brain, BarChart2, Bell, PieChart, Devices } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function Home() {
@@ -197,6 +196,126 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* Features Section */}
+      <section className="relative py-32 overflow-hidden">
+        {/* Background Elements */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0A2349] to-[#153A72]">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='10' cy='10' r='0.7' fill='%2348D1CC' opacity='0.2'/%3E%3C/svg%3E")`,
+          }}/>
+        </div>
+
+        {/* Content */}
+        <div className="relative z-10 max-w-7xl mx-auto px-4">
+          {/* Section Header */}
+          <div className="text-center mb-20 animate-fade-up">
+            <h3 className="text-[#48D1CC] font-semibold text-lg tracking-wider uppercase mb-4">
+              Powerful Capabilities
+            </h3>
+            <h2 className="text-white text-4xl md:text-5xl font-bold mb-6">
+              Key Features of TrendRadar.ai
+            </h2>
+            <p className="text-white/80 text-lg max-w-3xl mx-auto">
+              Our platform combines advanced AI with intuitive design to deliver actionable trend insights that keep you ahead of the competition.
+            </p>
+          </div>
+
+          {/* Features Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Feature 1: Real-Time Trend Monitoring */}
+            <div className="feature-card">
+              <div className="icon-wrapper">
+                <Radar className="feature-icon" />
+              </div>
+              <h3 className="feature-title">Real-Time Trend Monitoring</h3>
+              <p className="feature-description">
+                Detect emerging topics across social media, news sites, and blogs in real-time with our continuous scanning technology.
+              </p>
+              <div className="feature-tag">Never Miss a Trend</div>
+            </div>
+
+            {/* Feature 2: AI-Powered Analytics */}
+            <div className="feature-card">
+              <div className="icon-wrapper">
+                <Brain className="feature-icon" />
+              </div>
+              <h3 className="feature-title">AI-Powered Analytics</h3>
+              <p className="feature-description">
+                Advanced machine learning algorithms analyze patterns and predict which trends will gain significant traction.
+              </p>
+              <div className="feature-tag">90% Prediction Accuracy</div>
+            </div>
+
+            {/* Feature 3: Competitive Benchmarking */}
+            <div className="feature-card">
+              <div className="icon-wrapper">
+                <BarChart2 className="feature-icon" />
+              </div>
+              <h3 className="feature-title">Competitive Benchmarking</h3>
+              <p className="feature-description">
+                Compare your content performance against competitors and identify strategic opportunities in your market niche.
+              </p>
+              <div className="feature-tag">Strategic Advantage</div>
+            </div>
+
+            {/* Feature 4: Custom Alerts */}
+            <div className="feature-card">
+              <div className="icon-wrapper">
+                <Bell className="feature-icon" />
+              </div>
+              <h3 className="feature-title">Custom Alerts</h3>
+              <p className="feature-description">
+                Get notified immediately when relevant trends emerge in your industry with customizable real-time alerts.
+              </p>
+              <div className="feature-tag">Real-Time Notifications</div>
+            </div>
+
+            {/* Feature 5: Interactive Visualizations */}
+            <div className="feature-card">
+              <div className="icon-wrapper">
+                <PieChart className="feature-icon" />
+              </div>
+              <h3 className="feature-title">Interactive Visualizations</h3>
+              <p className="feature-description">
+                Explore trend data through intuitive, interactive charts and heatmaps for deeper insights and pattern recognition.
+              </p>
+              <div className="feature-tag">Visual Data Exploration</div>
+            </div>
+
+            {/* Feature 6: Cross-Platform Tracking */}
+            <div className="feature-card">
+              <div className="icon-wrapper">
+                <Devices className="feature-icon" />
+              </div>
+              <h3 className="feature-title">Cross-Platform Tracking</h3>
+              <p className="feature-description">
+                Analyze trends across social media, search engines, news outlets, and forums from a single, unified dashboard.
+              </p>
+              <div className="feature-tag">Comprehensive Coverage</div>
+            </div>
+          </div>
+
+          {/* CTA Section */}
+          <div className="mt-32 text-center">
+            <div className="bg-white/5 rounded-3xl p-16 backdrop-blur-sm">
+              <h2 className="text-white text-3xl md:text-4xl font-bold mb-4">
+                Ready to stay ahead of the competition?
+              </h2>
+              <p className="text-white/80 text-lg mb-8">
+                Start identifying emerging trends before they peak
+              </p>
+              <Button
+                onClick={() => navigate('/auth')}
+                className="bg-gradient-to-r from-[#48D1CC] to-[#40E0D0] text-[#0A2349] hover:from-[#40E0D0] hover:to-[#48D1CC] shadow-lg shadow-[#48D1CC]/20 text-lg h-[60px] px-8"
+              >
+                Start Your Free 14-Day Trial
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

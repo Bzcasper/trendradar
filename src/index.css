@@ -185,3 +185,34 @@
     transform: rotate(360deg);
   }
 }
+
+@layer components {
+  .feature-card {
+    @apply bg-gradient-to-b from-white to-[#F7FAFF] rounded-2xl p-8 transform transition-all duration-300;
+    @apply hover:translate-y-[-4px] hover:shadow-xl hover:shadow-[#48D1CC]/10;
+    @apply animate-fade-up;
+  }
+
+  .icon-wrapper {
+    @apply bg-gradient-to-br from-[#E6F8F8] to-[#F0FFFE] p-4 rounded-2xl w-16 h-16;
+    @apply flex items-center justify-center mb-6;
+    @apply shadow-lg shadow-[#48D1CC]/10;
+  }
+
+  .feature-icon {
+    @apply w-8 h-8 text-[#0A2349];
+  }
+
+  .feature-title {
+    @apply text-[#0A2349] text-xl font-bold mb-4;
+  }
+
+  .feature-description {
+    @apply text-[#5A6987] mb-6;
+  }
+
+  .feature-tag {
+    @apply bg-[#E6F8F8] text-[#0A2349] text-sm font-semibold px-4 py-2 rounded-full;
+    @apply inline-block;
+  }
+}
