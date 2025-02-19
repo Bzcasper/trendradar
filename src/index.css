@@ -1,5 +1,6 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://cdn.jsdelivr.net/npm/@fontsource/gilroy@4.5.3/index.css');
 
 @tailwind base;
 @tailwind components;
@@ -13,10 +14,10 @@
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221 83% 53%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --primary: 347 65% 33%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 350 100% 90%;
+    --secondary-foreground: 347 65% 33%;
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
     --accent: 210 40% 96.1%;
@@ -25,8 +26,8 @@
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 221 83% 53%;
-    --radius: 0.5rem;
+    --ring: 347 65% 33%;
+    --radius: 1rem;
   }
  
   * {
@@ -34,18 +35,22 @@
   }
 
   body {
-    @apply bg-background text-foreground font-inter;
+    @apply bg-background text-foreground font-inter antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-gilroy;
   }
 }
 
-.fade-in {
-  animation: fadeIn 0.5s ease-in;
+.fade-up {
+  animation: fadeUp 0.4s ease-out forwards;
 }
 
-@keyframes fadeIn {
+@keyframes fadeUp {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -65,20 +70,5 @@
   to {
     transform: translateX(0);
     opacity: 1;
-  }
-}
-
-.bounce {
-  animation: bounce 1s infinite;
-}
-
-@keyframes bounce {
-  0%, 100% {
-    transform: translateY(-25%);
-    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
-  }
-  50% {
-    transform: translateY(0);
-    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
   }
 }
