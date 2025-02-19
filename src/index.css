@@ -35,40 +35,116 @@
   }
 
   body {
-    @apply bg-background text-foreground font-inter antialiased;
+    @apply bg-background text-text-primary font-inter antialiased;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-gilroy;
+  /* Typography System */
+  h1 {
+    @apply font-gilroy font-extrabold text-h1 text-primary-dark;
+  }
+
+  h2 {
+    @apply font-gilroy font-semibold text-h2 text-primary-dark;
+  }
+
+  h3 {
+    @apply font-gilroy font-medium text-h3 text-primary-mid;
+  }
+
+  /* Body Text Styles */
+  .body-primary {
+    @apply font-inter text-body text-text-primary leading-normal;
+  }
+
+  .body-secondary {
+    @apply font-inter font-light text-body-sm text-text-secondary leading-normal;
+  }
+
+  .body-accent {
+    @apply font-inter font-medium text-accent text-primary-mid leading-snug;
+  }
+
+  /* Interactive Elements */
+  .btn {
+    @apply inline-flex items-center justify-center px-6 py-3 rounded-lg font-medium transition-all duration-200 ease-out;
+    @apply hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary-mid focus:ring-offset-2;
+  }
+
+  .btn-primary {
+    @apply bg-primary-mid text-white hover:bg-primary-dark;
+  }
+
+  .btn-secondary {
+    @apply bg-primary-light text-primary-dark hover:bg-primary-ultra-light;
+  }
+
+  /* Card Styles */
+  .card {
+    @apply bg-white rounded-lg border border-primary-light p-6 shadow-card transition-all duration-300;
+    @apply hover:shadow-card-hover;
+  }
+
+  /* Form Elements */
+  .form-input {
+    @apply w-full rounded-lg border border-primary-light bg-primary-ultra-light px-4 py-2;
+    @apply focus:outline-none focus:ring-2 focus:ring-primary-mid focus:border-transparent;
+    @apply transition-all duration-200;
+  }
+
+  /* Icons */
+  .icon {
+    @apply w-6 h-6 stroke-2 transition-colors duration-200;
+  }
+
+  .icon-primary {
+    @apply text-primary-dark hover:text-primary-mid;
+  }
+
+  /* Animation Classes */
+  .fade-up {
+    @apply animate-fade-up;
+  }
+
+  .scale-up {
+    @apply animate-scale-up;
+  }
+
+  .pulse {
+    @apply animate-pulse;
+  }
+
+  /* Container Patterns */
+  .dot-pattern {
+    background-size: 20px 20px;
+    @apply bg-dot-pattern bg-opacity-15;
+  }
+
+  /* Responsive Containers */
+  .container-responsive {
+    @apply container mx-auto px-4;
+    @apply sm:px-6 md:px-8 lg:px-12 xl:max-w-7xl;
   }
 }
 
-.fade-up {
-  animation: fadeUp 0.4s ease-out forwards;
-}
-
-@keyframes fadeUp {
-  from {
+/* Custom Animations */
+@keyframes staggered-fade-up {
+  0% {
     opacity: 0;
     transform: translateY(20px);
   }
-  to {
+  100% {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-.slide-in {
-  animation: slideIn 0.5s ease-out;
+.staggered-item {
+  opacity: 0;
+  animation: staggered-fade-up 0.4s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
 }
 
-@keyframes slideIn {
-  from {
-    transform: translateX(100px);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
+.staggered-item:nth-child(1) { animation-delay: 0.1s; }
+.staggered-item:nth-child(2) { animation-delay: 0.2s; }
+.staggered-item:nth-child(3) { animation-delay: 0.3s; }
+.staggered-item:nth-child(4) { animation-delay: 0.4s; }
+.staggered-item:nth-child(5) { animation-delay: 0.5s; }
