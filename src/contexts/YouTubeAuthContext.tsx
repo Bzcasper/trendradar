@@ -29,25 +29,19 @@ export function YouTubeAuthProvider({ children }: { children: React.ReactNode })
     try {
       console.log('Initiating YouTube login...');
 
-      const { data, error } = await supabase.functions.invoke('youtube-auth', {
-        method: 'POST',
-        body: { action: 'login' },
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      // First ensure we have a valid session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session) {
+        throw new Error('Authentication required. Please sign in first.');
+      }
 
-      console.log('Function response:', { data, error });
-
-      if (error) {
-        console.error('Supabase function error:', error);
-        // Try alternative fetch approach
-        const { data: { session } } = await supabase.auth.getSession();
-        const response = await fetch('https://vaubsaaeexjdgzpzuqcm.supabase.co/functions/v1/youtube-auth', {
+      // Try direct fetch approach first
+      try {
+        const response = await fetch('https://vaubsaaeexjdgzpzuqcm.functions.supabase.co/youtube-auth', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session?.access_token}`,
+            'Authorization': `Bearer ${session.access_token}`,
           },
           body: JSON.stringify({ action: 'login' }),
         });
@@ -56,20 +50,32 @@ export function YouTubeAuthProvider({ children }: { children: React.ReactNode })
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const result = await response.json();
-        if (result.authUrl) {
-          console.log('Redirecting to auth URL:', result.authUrl);
-          window.location.href = result.authUrl;
+        const data = await response.json();
+        if (data.authUrl) {
+          console.log('Redirecting to auth URL:', data.authUrl);
+          window.location.href = data.authUrl;
           return;
         }
-        throw new Error('No auth URL received');
-      }
+      } catch (fetchError) {
+        console.error('Direct fetch failed, trying supabase.functions.invoke:', fetchError);
+        
+        // Fallback to supabase.functions.invoke
+        const { data, error } = await supabase.functions.invoke('youtube-auth', {
+          method: 'POST',
+          body: { action: 'login' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+        });
 
-      if (data?.authUrl) {
+        console.log('Function response:', { data, error });
+
+        if (error) throw error;
+        if (!data?.authUrl) throw new Error('No auth URL received from the server');
+
         console.log('Redirecting to auth URL:', data.authUrl);
         window.location.href = data.authUrl;
-      } else {
-        throw new Error('No auth URL received from the server');
       }
     } catch (error) {
       console.error('YouTube login error:', error);
