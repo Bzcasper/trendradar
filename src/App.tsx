@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 import { LoadingState } from "@/components/ui/loading-state";
 import { Navbar } from "@/components/Layout/Navbar";
+import { Footer } from "@/components/Layout/Footer";
 import { Toaster } from "@/components/ui/toaster";
 import Index from "@/pages/Index";
 import Auth from "@/pages/Auth";
@@ -12,22 +13,39 @@ import Terms from "@/pages/Terms";
 import Contact from "@/pages/Contact";
 import Home from "@/pages/Home";
 import Privacy from "@/pages/Privacy";
+import Features from "@/pages/Features";
+import About from "@/pages/About";
+import Blog from "@/pages/Blog";
+import FAQ from "@/pages/FAQ";
+import HowItWorks from "@/pages/HowItWorks";
+import Pricing from "@/pages/Pricing";
 
 export default function App() {
   return (
-    <Suspense fallback={<LoadingState />}>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/dashboard" element={<Index />} />
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/auth/callback" element={<AuthCallback />} />
-        <Route path="/terms" element={<Terms />} />
-        <Route path="/privacy" element={<Privacy />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-      <Toaster />
-    </Suspense>
+    <div className="min-h-screen flex flex-col">
+      <Suspense fallback={<LoadingState />}>
+        <Navbar />
+        <main className="flex-1">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/dashboard" element={<Index />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/features" element={<Features />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/how-it-works" element={<HowItWorks />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </main>
+        <Footer />
+        <Toaster />
+      </Suspense>
+    </div>
   );
 }
