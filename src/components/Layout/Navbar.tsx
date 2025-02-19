@@ -1,6 +1,6 @@
-
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { LoadingLogo } from "@/components/ui/loading-logo";
 
 export const Navbar = () => {
   const navigate = useNavigate();
@@ -10,10 +10,7 @@ export const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <a href="/" className="flex items-center space-x-2">
-            <div className="relative w-8 h-8">
-              <circle cx="24" cy="24" r="24" className="fill-none stroke-[#48D1CC] stroke-2"/>
-              <path d="M24,8 A16,16 0 0 1 40,24 L24,24 Z" className="fill-[#48D1CC]"/>
-            </div>
+            <LoadingLogo size="sm" />
             <span className="text-white font-gilroy text-xl font-bold">
               trend<span className="text-[#48D1CC]">radar</span>.ai
             </span>
