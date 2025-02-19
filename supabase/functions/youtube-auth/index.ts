@@ -4,7 +4,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Max-Age': '86400',
 };
 
@@ -13,8 +13,8 @@ const YOUTUBE_CLIENT_SECRET = Deno.env.get('YOUTUBE_CLIENT_SECRET');
 const REDIRECT_URI = 'https://trendradar.ai/auth/callback';
 
 serve(async (req) => {
-  console.log('Received request:', req.method, req.url);
-  
+  console.log('YouTube auth function invoked:', req.method);
+
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, {
@@ -24,27 +24,13 @@ serve(async (req) => {
   }
 
   try {
-    // Health check endpoint
-    if (req.method === 'GET') {
-      return new Response(
-        JSON.stringify({ status: 'healthy', timestamp: new Date().toISOString() }),
-        {
-          status: 200,
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-    }
-
     // Verify environment variables
     if (!YOUTUBE_CLIENT_ID || !YOUTUBE_CLIENT_SECRET) {
       console.error('Missing required environment variables');
       throw new Error('YouTube API credentials not configured');
     }
 
-    // Parse request body for POST requests
+    // Parse request body
     let body;
     try {
       body = await req.json();

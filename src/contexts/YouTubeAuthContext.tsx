@@ -29,15 +29,10 @@ export function YouTubeAuthProvider({ children }: { children: React.ReactNode })
     try {
       console.log('Initiating YouTube login...');
 
-      // First check if the function endpoint is accessible
-      const functionUrl = `${supabase.functions.url}/youtube-auth`;
-      console.log('Function URL:', functionUrl);
-
       const { data, error } = await supabase.functions.invoke('youtube-auth', {
         method: 'POST',
         body: { action: 'login' },
         headers: {
-          prefer: 'return=minimal',
           'Content-Type': 'application/json',
         },
       });
@@ -46,12 +41,13 @@ export function YouTubeAuthProvider({ children }: { children: React.ReactNode })
 
       if (error) {
         console.error('Supabase function error:', error);
-        // Try alternative direct fetch if supabase.functions.invoke fails
-        const response = await fetch(`${supabase.functions.url}/youtube-auth`, {
+        // Try alternative fetch approach
+        const { data: { session } } = await supabase.auth.getSession();
+        const response = await fetch('https://vaubsaaeexjdgzpzuqcm.supabase.co/functions/v1/youtube-auth', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${supabase.auth.session()?.access_token}`,
+            'Authorization': `Bearer ${session?.access_token}`,
           },
           body: JSON.stringify({ action: 'login' }),
         });
