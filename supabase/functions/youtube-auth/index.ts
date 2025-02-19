@@ -1,5 +1,5 @@
 
-import { serve } from "https://deno.fresh.dev/std@v9.6.1/http/server.ts";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders } from '../_shared/cors.ts';
 
 console.log('YouTube auth function starting...');
