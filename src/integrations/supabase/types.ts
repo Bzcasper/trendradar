@@ -639,6 +639,59 @@ export type Database = {
           },
         ]
       }
+      project_tasks: {
+        Row: {
+          assigned_to: string | null
+          category: Database["public"]["Enums"]["task_category"] | null
+          created_at: string | null
+          description: string | null
+          due_date: string | null
+          id: string
+          parent_task_id: string | null
+          priority: Database["public"]["Enums"]["task_priority"] | null
+          status: Database["public"]["Enums"]["task_status"] | null
+          tags: string[] | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          category?: Database["public"]["Enums"]["task_category"] | null
+          created_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          parent_task_id?: string | null
+          priority?: Database["public"]["Enums"]["task_priority"] | null
+          status?: Database["public"]["Enums"]["task_status"] | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          category?: Database["public"]["Enums"]["task_category"] | null
+          created_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          parent_task_id?: string | null
+          priority?: Database["public"]["Enums"]["task_priority"] | null
+          status?: Database["public"]["Enums"]["task_status"] | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_tasks_parent_task_id_fkey"
+            columns: ["parent_task_id"]
+            isOneToOne: false
+            referencedRelation: "project_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           created_at: string | null
@@ -1977,7 +2030,15 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      task_category:
+        | "issue"
+        | "improvement"
+        | "feature"
+        | "bug"
+        | "security"
+        | "performance"
+      task_priority: "low" | "medium" | "high" | "critical"
+      task_status: "pending" | "in_progress" | "completed" | "blocked"
     }
     CompositeTypes: {
       http_header: {
