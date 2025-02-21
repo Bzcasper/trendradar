@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { LoadingLogo } from "@/components/ui/loading-logo";
@@ -26,7 +27,7 @@ export const Navbar = () => {
             <div className="flex items-center space-x-4">
               <Button 
                 variant="ghost"
-                onClick={() => navigate('/login')}
+                onClick={() => navigate('/auth')}
                 className="text-white hover:text-[#48D1CC] hover:bg-[#48D1CC]/10"
               >
                 Login
