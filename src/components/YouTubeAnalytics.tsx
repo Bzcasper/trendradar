@@ -8,13 +8,21 @@ import { useToast } from "./ui/use-toast";
 import { format } from "date-fns";
 import { useAuth } from "@/contexts/AuthContext";
 import mockTrendData from "@/data/mockTrendData";
+import { Badge } from "./ui/badge";
+import { TrendingUp, TrendingDown, Search, RefreshCw } from "lucide-react";
+import { calculateTrendingScore } from "@/utils/trendingAlgorithm";
+import { fetchMultiPlatformTrends } from "@/utils/apiService";
+import { Button } from "./ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 
 // Using static mock data to avoid needing private API keys
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
+const COLORS = ['#1E3A8A', '#00D4FF', '#FF8F3F', '#10B981', '#8B5CF6'];
 
 export const YouTubeAnalytics = () => {
   const [searchResults, setSearchResults] = useState(mockTrendData);
   const [isLoading, setIsLoading] = useState(false);
+  const [platform, setPlatform] = useState("all");
+  const [timeframe, setTimeframe] = useState("week");
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -30,30 +38,77 @@ export const YouTubeAnalytics = () => {
 
     setIsLoading(true);
     try {
-      // In a real app, this would call an API with the query
-      // For now, we're just filtering the mock data
-      const filteredResults = mockTrendData.filter(item => 
-        item.title.toLowerCase().includes(query.toLowerCase()) ||
-        item.description.toLowerCase().includes(query.toLowerCase())
-      );
+      // In a real app, we would call our multi-platform API service
+      // For now, we'll simulate this with mock data and our algorithm
+      let results;
       
-      setTimeout(() => {
-        setSearchResults(filteredResults.length > 0 ? filteredResults : mockTrendData);
+      if (query.trim() === "") {
+        results = mockTrendData;
+      } else {
+        // Try to fetch from public APIs if possible, otherwise filter mock data
+        try {
+          results = await fetchMultiPlatformTrends(query, platform, timeframe);
+        } catch (apiError) {
+          console.log("API fetch failed, using filtered mock data", apiError);
+          
+          // Filter mock data as fallback
+          results = mockTrendData.filter(item => 
+            item.title.toLowerCase().includes(query.toLowerCase()) ||
+            item.description.toLowerCase().includes(query.toLowerCase())
+          );
+        }
+      }
+      
+      // Apply our trending algorithm to each result
+      const processedResults = results.map(item => {
+        // Calculate scores based on our algorithm
+        const trendingMetrics = calculateTrendingScore(
+          item.views,
+          item.likes,
+          item.comments,
+          new Date(item.published_at),
+          item.engagement_rate || 0
+        );
         
-        toast({
-          title: "Search completed",
-          description: `Found ${filteredResults.length} results for "${query}"`,
-        });
-        setIsLoading(false);
-      }, 1000); // Simulate network delay
+        return {
+          ...item,
+          view_velocity: trendingMetrics.viewVelocity,
+          engagement_rate: trendingMetrics.engagementRate,
+          trending_score: trendingMetrics.trendingScore,
+          viral_probability: trendingMetrics.viralProbability,
+          trend_acceleration: trendingMetrics.trendAcceleration,
+          rsi: trendingMetrics.rsi,
+          relative_volume: trendingMetrics.relativeVolume
+        };
+      });
+      
+      // Sort by trending score descending
+      processedResults.sort((a, b) => (b.trending_score || 0) - (a.trending_score || 0));
+      
+      setSearchResults(processedResults);
+      
+      toast({
+        title: "Analysis Complete",
+        description: `Found and analyzed ${processedResults.length} results for "${query}"`,
+      });
     } catch (error) {
       console.error('Search failed:', error);
       toast({
         title: "Search failed",
-        description: "An error occurred while searching",
+        description: "An error occurred while analyzing trends",
         variant: "destructive",
       });
+    } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Handle platform selection
+  const handlePlatformChange = (newPlatform: string) => {
+    setPlatform(newPlatform);
+    // Re-run search with new platform if there was a previous search
+    if (searchResults.length > 0 && searchResults !== mockTrendData) {
+      handleSearch("");
     }
   };
 
@@ -70,19 +125,19 @@ export const YouTubeAnalytics = () => {
 
   // Prepare data for charts
   const viewsData = searchResults.map(video => ({
-    name: video.title?.substring(0, 20) + "..." || 'Untitled',
+    name: video.title?.substring(0, 15) + "..." || 'Untitled',
     views: video.views || 0,
     velocity: video.view_velocity || 0,
-  }));
+  })).slice(0, 8);
 
   const engagementData = searchResults.map(video => ({
-    name: video.title?.substring(0, 20) + "..." || 'Untitled',
+    name: video.title?.substring(0, 15) + "..." || 'Untitled',
     likes: video.likes || 0,
     comments: video.comments || 0,
     engagement: video.engagement_rate || 0,
     trending: video.trending_score || 0,
     viral: (video.viral_probability || 0) * 100,
-  }));
+  })).slice(0, 8);
 
   // Prepare keyword data
   const keywordData = searchResults.reduce((acc, video) => {
@@ -97,20 +152,18 @@ export const YouTubeAnalytics = () => {
       });
     }
     return acc;
-  }, []).sort((a, b) => b.count - a.count).slice(0, 15);
+  }, []).sort((a, b) => b.count - a.count).slice(0, 12);
 
   return (
     <div className="space-y-8">
       {!user && (
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-8">
+        <div className="bg-brand-primary/10 border-l-4 border-brand-primary p-4 mb-8 rounded">
           <div className="flex">
             <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
+              <Shield className="h-5 w-5 text-brand-primary" />
             </div>
             <div className="ml-3">
-              <p className="text-sm text-yellow-700">
+              <p className="text-sm text-primary">
                 Please sign in to access the full features of TrendRadar.
               </p>
             </div>
@@ -118,39 +171,76 @@ export const YouTubeAnalytics = () => {
         </div>
       )}
       
-      <SearchBox onSearch={handleSearch} isLoading={isLoading} />
+      <div className="grid gap-4 md:flex md:items-center md:justify-between mb-6">
+        <div className="flex-1">
+          <SearchBox onSearch={handleSearch} isLoading={isLoading} />
+        </div>
+        
+        <div className="flex flex-wrap gap-2">
+          <Tabs 
+            defaultValue="all" 
+            value={platform} 
+            onValueChange={handlePlatformChange}
+            className="w-full md:w-auto"
+          >
+            <TabsList className="w-full md:w-auto">
+              <TabsTrigger value="all">All</TabsTrigger>
+              <TabsTrigger value="youtube">YouTube</TabsTrigger>
+              <TabsTrigger value="reddit">Reddit</TabsTrigger>
+              <TabsTrigger value="tiktok">TikTok</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          
+          <Button 
+            variant="outline" 
+            size="icon"
+            onClick={() => handleSearch("")}
+            disabled={isLoading}
+          >
+            <RefreshCw className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
       
       <div className="grid grid-cols-1 gap-8">
         {/* Comprehensive Video Details Table */}
-        <DashboardCard title="Video Analysis Results">
-          <div className="overflow-auto max-h-[400px]">
+        <DashboardCard title="Trend Analysis Results" className="trend-card">
+          <div className="overflow-auto max-h-[600px]">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead className="min-w-[200px]">Title & Preview</TableHead>
-                  <TableHead>Published Date</TableHead>
+                  <TableHead>Published</TableHead>
                   <TableHead>Views</TableHead>
-                  <TableHead>Likes</TableHead>
-                  <TableHead>Comments</TableHead>
+                  <TableHead>Engagement</TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead>View Velocity</TableHead>
-                  <TableHead>Engagement Rate</TableHead>
-                  <TableHead>Trending Score</TableHead>
+                  <TableHead>
+                    <div className="flex items-center space-x-1">
+                      <span>Trend Score</span>
+                      <TrendingUp className="h-4 w-4 text-brand-secondary" />
+                    </div>
+                  </TableHead>
                   <TableHead>Viral Probability</TableHead>
-                  <TableHead>Video Link</TableHead>
+                  <TableHead>Link</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {searchResults.map((video) => (
-                  <TableRow key={video.id}>
+                  <TableRow key={video.id} className="hover-scale">
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-2">
                         <img 
                           src={video.thumbnail_url} 
                           alt={video.title}
-                          className="w-10 h-10 rounded object-cover"
+                          className="w-12 h-12 rounded-md object-cover"
                         />
-                        <span className="text-sm">{video.title}</span>
+                        <div className="flex flex-col text-left">
+                          <span className="text-sm font-medium">{video.title}</span>
+                          <span className="text-xs text-muted-foreground truncate max-w-[180px]">
+                            {video.description.substring(0, 60)}...
+                          </span>
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -159,27 +249,73 @@ export const YouTubeAnalytics = () => {
                         : 'N/A'}
                     </TableCell>
                     <TableCell>{video.views?.toLocaleString() || '0'}</TableCell>
-                    <TableCell>{video.likes?.toLocaleString() || '0'}</TableCell>
-                    <TableCell>{video.comments?.toLocaleString() || '0'}</TableCell>
-                    <TableCell>{video.category || 'Uncategorized'}</TableCell>
                     <TableCell>
-                      {(video.view_velocity || 0).toFixed(1)} views/hr
+                      <div className="flex items-center">
+                        <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                          <div 
+                            className="bg-brand-accent h-2.5 rounded-full" 
+                            style={{ width: `${Math.min(100, (video.engagement_rate || 0) * 10)}%` }}
+                          ></div>
+                        </div>
+                        <span className="ml-2 text-xs">{(video.engagement_rate || 0).toFixed(1)}%</span>
+                      </div>
                     </TableCell>
                     <TableCell>
-                      {(video.engagement_rate || 0).toFixed(2)}%
+                      <Badge variant="outline" className="bg-background/60">
+                        {video.category || 'Uncategorized'}
+                      </Badge>
                     </TableCell>
                     <TableCell>
-                      {(video.trending_score || 0).toFixed(1)}
+                      <div className="flex items-center">
+                        {(video.view_velocity || 0) > 4000 ? (
+                          <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
+                        ) : (
+                          <TrendingDown className="h-4 w-4 text-orange-500 mr-1" />
+                        )}
+                        {(video.view_velocity || 0).toFixed(0)} v/hr
+                      </div>
                     </TableCell>
                     <TableCell>
-                      {((video.viral_probability || 0) * 100).toFixed(1)}%
+                      <div className="flex items-center space-x-1">
+                        <div 
+                          className={`h-2 w-2 rounded-full ${
+                            (video.trending_score || 0) > 75 
+                              ? 'bg-green-500' 
+                              : (video.trending_score || 0) > 50 
+                                ? 'bg-yellow-500' 
+                                : 'bg-orange-500'
+                          }`}
+                        ></div>
+                        <span className="font-medium">
+                          {(video.trending_score || 0).toFixed(1)}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center">
+                        <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                          <div 
+                            className={`h-2.5 rounded-full ${
+                              (video.viral_probability || 0) > 0.7 
+                                ? 'bg-green-500' 
+                                : (video.viral_probability || 0) > 0.5 
+                                  ? 'bg-yellow-500' 
+                                  : 'bg-orange-500'
+                            }`}
+                            style={{ width: `${(video.viral_probability || 0) * 100}%` }}
+                          ></div>
+                        </div>
+                        <span className="ml-2 text-xs">
+                          {((video.viral_probability || 0) * 100).toFixed(0)}%
+                        </span>
+                      </div>
                     </TableCell>
                     <TableCell>
                       <a
                         href={`https://youtube.com/watch?v=${video.video_id}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-500 hover:text-blue-700 underline"
+                        className="text-brand-secondary hover:text-brand-secondary/80 underline text-sm"
                       >
                         Watch
                       </a>
@@ -193,7 +329,7 @@ export const YouTubeAnalytics = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Category Distribution Pie Chart */}
-          <DashboardCard title="Category Distribution">
+          <DashboardCard title="Category Distribution" className="trend-card">
             <div className="h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -210,7 +346,7 @@ export const YouTubeAnalytics = () => {
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip />
+                  <Tooltip formatter={(value) => [`${value} videos`, 'Count']} />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
@@ -218,53 +354,53 @@ export const YouTubeAnalytics = () => {
           </DashboardCard>
 
           {/* Views and Velocity Comparison */}
-          <DashboardCard title="Views & Velocity Analysis">
+          <DashboardCard title="Views & Velocity Analysis" className="trend-card">
             <div className="h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={viewsData} margin={{ top: 20, right: 30, left: 20, bottom: 120 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
                   <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
                   <YAxis yAxisId="left" />
                   <YAxis yAxisId="right" orientation="right" />
-                  <Tooltip />
+                  <Tooltip formatter={(value) => [value.toLocaleString(), '']} />
                   <Legend />
-                  <Bar yAxisId="left" dataKey="views" fill="#8884d8" name="Total Views" />
-                  <Bar yAxisId="right" dataKey="velocity" fill="#82ca9d" name="View Velocity" />
+                  <Bar yAxisId="left" dataKey="views" fill="#1E3A8A" name="Total Views" />
+                  <Bar yAxisId="right" dataKey="velocity" fill="#00D4FF" name="View Velocity" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </DashboardCard>
 
           {/* Engagement Metrics */}
-          <DashboardCard title="Engagement Analysis">
+          <DashboardCard title="Engagement Analysis" className="trend-card">
             <div className="h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={engagementData} margin={{ top: 20, right: 30, left: 20, bottom: 120 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
                   <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
                   <YAxis />
-                  <Tooltip />
+                  <Tooltip formatter={(value) => [value.toLocaleString(), '']} />
                   <Legend />
-                  <Line type="monotone" dataKey="likes" stroke="#8884d8" name="Likes" />
-                  <Line type="monotone" dataKey="comments" stroke="#82ca9d" name="Comments" />
-                  <Line type="monotone" dataKey="engagement" stroke="#ffc658" name="Engagement Rate %" />
+                  <Line type="monotone" dataKey="likes" stroke="#1E3A8A" name="Likes" />
+                  <Line type="monotone" dataKey="comments" stroke="#00D4FF" name="Comments" />
+                  <Line type="monotone" dataKey="engagement" stroke="#FF8F3F" name="Engagement Rate %" />
                 </LineChart>
               </ResponsiveContainer>
             </div>
           </DashboardCard>
 
           {/* Trending and Viral Probability */}
-          <DashboardCard title="Trend & Viral Analysis">
+          <DashboardCard title="Trend & Viral Analysis" className="trend-card">
             <div className="h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={engagementData} margin={{ top: 20, right: 30, left: 20, bottom: 120 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
                   <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
                   <YAxis />
-                  <Tooltip />
+                  <Tooltip formatter={(value) => [value.toLocaleString(), '']} />
                   <Legend />
-                  <Line type="monotone" dataKey="trending" stroke="#8884d8" name="Trending Score" />
-                  <Line type="monotone" dataKey="viral" stroke="#82ca9d" name="Viral Probability %" />
+                  <Line type="monotone" dataKey="trending" stroke="#1E3A8A" name="Trending Score" />
+                  <Line type="monotone" dataKey="viral" stroke="#FF8F3F" name="Viral Probability %" />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -272,7 +408,7 @@ export const YouTubeAnalytics = () => {
         </div>
 
         {/* Add the new Keyword Analysis chart at the bottom */}
-        <DashboardCard title="Keyword Analysis">
+        <DashboardCard title="Keyword Analysis" className="trend-card">
           <div className="w-full h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
@@ -284,7 +420,7 @@ export const YouTubeAnalytics = () => {
                   bottom: 120,
                 }}
               >
-                <CartesianGrid strokeDasharray="3 3" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
                 <XAxis
                   dataKey="keyword"
                   angle={-45}
@@ -293,10 +429,9 @@ export const YouTubeAnalytics = () => {
                   interval={0}
                 />
                 <YAxis />
-                <Tooltip />
+                <Tooltip formatter={(value) => [`${value} occurrences`, 'Frequency']} />
                 <Bar
                   dataKey="count"
-                  fill="#8884d8"
                   name="Occurrences"
                   radius={[4, 4, 0, 0]}
                 >

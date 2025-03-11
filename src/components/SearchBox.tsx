@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, Search, Sparkles } from "lucide-react";
 
 interface SearchBoxProps {
   onSearch: (query: string) => void;
@@ -14,29 +14,40 @@ export const SearchBox = ({ onSearch, isLoading }: SearchBoxProps) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (query.trim()) {
-      onSearch(query);
-    }
+    onSearch(query);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2 max-w-2xl mx-auto mb-8">
-      <Input
-        type="text"
-        placeholder="Search YouTube videos..."
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        className="flex-1"
+    <form onSubmit={handleSubmit} className="flex gap-2 max-w-2xl w-full">
+      <div className="relative flex-1">
+        <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+          <Search className="h-4 w-4 text-muted-foreground" />
+        </div>
+        <Input
+          type="text"
+          placeholder="Search for trends across platforms..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="pl-10 pr-4 py-6 transition-all text-base"
+          disabled={isLoading}
+        />
+      </div>
+      <Button 
+        type="submit" 
         disabled={isLoading}
-      />
-      <Button type="submit" disabled={isLoading}>
+        size="lg"
+        className="min-w-[120px] bg-brand-primary hover:bg-brand-primary/90"
+      >
         {isLoading ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Searching
+            Analyzing
           </>
         ) : (
-          'Search'
+          <>
+            <Sparkles className="mr-2 h-4 w-4" />
+            Analyze
+          </>
         )}
       </Button>
     </form>
