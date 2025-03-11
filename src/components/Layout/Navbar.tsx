@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { LoadingLogo } from "@/components/ui/loading-logo";
+import { Link } from "react-router-dom";
 
 export const Navbar = () => {
   const navigate = useNavigate();
@@ -10,19 +11,19 @@ export const Navbar = () => {
     <nav className="fixed top-0 w-full bg-[#0A2349]/90 backdrop-blur-sm z-40 border-b border-[#48D1CC]/10">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <a href="/" className="flex items-center space-x-2">
+          <Link to="/" className="flex items-center space-x-2">
             <LoadingLogo size="sm" />
             <span className="text-white font-gilroy text-xl font-bold">
               trend<span className="text-[#48D1CC]">radar</span>.ai
             </span>
-          </a>
+          </Link>
           
           <div className="hidden md:flex items-center space-x-8">
-            <a href="/features" className="text-white/80 hover:text-[#48D1CC] transition-colors">Features</a>
-            <a href="/how-it-works" className="text-white/80 hover:text-[#48D1CC] transition-colors">How It Works</a>
-            <a href="/pricing" className="text-white/80 hover:text-[#48D1CC] transition-colors">Pricing</a>
-            <a href="/resources" className="text-white/80 hover:text-[#48D1CC] transition-colors">Resources</a>
-            <a href="/contact" className="text-white/80 hover:text-[#48D1CC] transition-colors">Contact</a>
+            <Link to="/features" className="text-white/80 hover:text-[#48D1CC] transition-colors">Features</Link>
+            <Link to="/how-it-works" className="text-white/80 hover:text-[#48D1CC] transition-colors">How It Works</Link>
+            <Link to="/pricing" className="text-white/80 hover:text-[#48D1CC] transition-colors">Pricing</Link>
+            <Link to="/resources" className="text-white/80 hover:text-[#48D1CC] transition-colors">Resources</Link>
+            <Link to="/contact" className="text-white/80 hover:text-[#48D1CC] transition-colors">Contact</Link>
             
             <div className="flex items-center space-x-4">
               <Button 

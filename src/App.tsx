@@ -19,6 +19,7 @@ import Blog from "@/pages/Blog";
 import FAQ from "@/pages/FAQ";
 import HowItWorks from "@/pages/HowItWorks";
 import Pricing from "@/pages/Pricing";
+import Resources from "@/pages/Resources";
 
 export default function App() {
   return (
@@ -40,6 +41,7 @@ export default function App() {
             <Route path="/faq" element={<FAQ />} />
             <Route path="/how-it-works" element={<HowItWorks />} />
             <Route path="/pricing" element={<Pricing />} />
+            <Route path="/resources" element={<Resources />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
