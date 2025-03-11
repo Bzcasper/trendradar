@@ -137,11 +137,11 @@ async function fetchTikTokTrends(query: string) {
  */
 function generateSyntheticTikTokData(query: string) {
   const tiktokTitles = [
-    'How to perfect that trending dance move #dance #viral',
-    'What I eat in a day as a fitness model #fitness #nutrition',
-    'DIY home decor ideas you haven't seen before #homedecor #diy',
-    'Transforming my apartment with just $100 #budget #interiordesign',
-    'Day in the life of a software engineer #tech #coding'
+    "How to perfect that trending dance move #dance #viral",
+    "What I eat in a day as a fitness model #fitness #nutrition",
+    "DIY home decor ideas you haven't seen before #homedecor #diy",
+    "Transforming my apartment with just $100 #budget #interiordesign",
+    "Day in the life of a software engineer #tech #coding"
   ];
   
   return tiktokTitles
