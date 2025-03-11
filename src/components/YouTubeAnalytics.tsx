@@ -1,50 +1,28 @@
+
 import { useState } from "react";
 import { SearchBox } from "./SearchBox";
 import { DashboardCard } from "./DashboardCard";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line } from "recharts";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "./ui/use-toast";
 import { format } from "date-fns";
-import { useYouTubeAuth } from "@/contexts/YouTubeAuthContext";
-import { Button } from "./ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import mockTrendData from "@/data/mockTrendData";
 
-interface VideoResult {
-  id: string;
-  video_id: string;
-  title: string;
-  views: number;
-  likes: number;
-  comments: number;
-  category: string;
-  thumbnail_url: string;
-  published_at: string;
-  description: string;
-  engagement_rate?: number;
-  view_velocity?: number;
-  trending_score?: number;
-  viral_probability?: number;
-  keywords?: { keyword: string; count: number }[];
-}
-
+// Using static mock data to avoid needing private API keys
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
-interface KeywordData {
-  keyword: string;
-  count: number;
-}
-
 export const YouTubeAnalytics = () => {
-  const [searchResults, setSearchResults] = useState<VideoResult[]>([]);
+  const [searchResults, setSearchResults] = useState(mockTrendData);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { isAuthenticated, login, logout } = useYouTubeAuth();
+  const { user } = useAuth();
 
   const handleSearch = async (query: string) => {
-    if (!isAuthenticated) {
+    if (!user) {
       toast({
         title: "Authentication Required",
-        description: "Please connect your YouTube account first",
+        description: "Please sign in first to use the trending analysis tool",
         variant: "destructive",
       });
       return;
@@ -52,36 +30,35 @@ export const YouTubeAnalytics = () => {
 
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('youtube-search', {
-        body: { query }
-      });
-
-      if (error) {
-        console.error('Search error:', error);
-        throw error;
-      }
-
-      console.log('Search results:', data);
-      setSearchResults(data);
+      // In a real app, this would call an API with the query
+      // For now, we're just filtering the mock data
+      const filteredResults = mockTrendData.filter(item => 
+        item.title.toLowerCase().includes(query.toLowerCase()) ||
+        item.description.toLowerCase().includes(query.toLowerCase())
+      );
       
-      toast({
-        title: "Search completed",
-        description: `Found ${data.length} results for "${query}"`,
-      });
+      setTimeout(() => {
+        setSearchResults(filteredResults.length > 0 ? filteredResults : mockTrendData);
+        
+        toast({
+          title: "Search completed",
+          description: `Found ${filteredResults.length} results for "${query}"`,
+        });
+        setIsLoading(false);
+      }, 1000); // Simulate network delay
     } catch (error) {
       console.error('Search failed:', error);
       toast({
         title: "Search failed",
-        description: error.message,
+        description: "An error occurred while searching",
         variant: "destructive",
       });
-    } finally {
       setIsLoading(false);
     }
   };
 
   // Prepare data for pie chart
-  const categoryData = searchResults.reduce((acc: any[], video) => {
+  const categoryData = searchResults.reduce((acc, video) => {
     const existingCategory = acc.find(item => item.name === video.category);
     if (existingCategory) {
       existingCategory.value += 1;
@@ -108,7 +85,7 @@ export const YouTubeAnalytics = () => {
   }));
 
   // Prepare keyword data
-  const keywordData = searchResults.reduce((acc: KeywordData[], video) => {
+  const keywordData = searchResults.reduce((acc, video) => {
     if (video.keywords) {
       video.keywords.forEach(({ keyword, count }) => {
         const existing = acc.find(k => k.keyword === keyword);
@@ -124,17 +101,22 @@ export const YouTubeAnalytics = () => {
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-end mb-4">
-        {isAuthenticated ? (
-          <Button onClick={logout} variant="outline">
-            Disconnect YouTube
-          </Button>
-        ) : (
-          <Button onClick={login}>
-            Connect YouTube Account
-          </Button>
-        )}
-      </div>
+      {!user && (
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-8">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-yellow-700">
+                Please sign in to access the full features of TrendRadar.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       
       <SearchBox onSearch={handleSearch} isLoading={isLoading} />
       

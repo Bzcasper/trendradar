@@ -5,6 +5,8 @@ import { LoadingState } from "@/components/ui/loading-state";
 import { Navbar } from "@/components/Layout/Navbar";
 import { Footer } from "@/components/Layout/Footer";
 import { Toaster } from "@/components/ui/toaster";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { YouTubeAuthProvider } from "@/contexts/YouTubeAuthContext";
 import Index from "@/pages/Index";
 import Auth from "@/pages/Auth";
 import AuthCallback from "@/pages/auth/callback";
@@ -23,31 +25,35 @@ import Resources from "@/pages/Resources";
 
 export default function App() {
   return (
-    <div className="min-h-screen flex flex-col">
-      <Suspense fallback={<LoadingState />}>
-        <Navbar />
-        <main className="flex-1">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/dashboard" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/auth/callback" element={<AuthCallback />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/features" element={<Features />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/faq" element={<FAQ />} />
-            <Route path="/how-it-works" element={<HowItWorks />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/resources" element={<Resources />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </main>
-        <Footer />
-        <Toaster />
-      </Suspense>
-    </div>
+    <AuthProvider>
+      <YouTubeAuthProvider>
+        <div className="min-h-screen flex flex-col">
+          <Suspense fallback={<LoadingState />}>
+            <Navbar />
+            <main className="flex-1 pt-16">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/dashboard" element={<Index />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/auth/callback" element={<AuthCallback />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/features" element={<Features />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/faq" element={<FAQ />} />
+                <Route path="/how-it-works" element={<HowItWorks />} />
+                <Route path="/pricing" element={<Pricing />} />
+                <Route path="/resources" element={<Resources />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </main>
+            <Footer />
+            <Toaster />
+          </Suspense>
+        </div>
+      </YouTubeAuthProvider>
+    </AuthProvider>
   );
 }

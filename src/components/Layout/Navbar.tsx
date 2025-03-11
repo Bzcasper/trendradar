@@ -3,9 +3,11 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { LoadingLogo } from "@/components/ui/loading-logo";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const Navbar = () => {
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
   
   return (
     <nav className="fixed top-0 w-full bg-[#0A2349]/90 backdrop-blur-sm z-40 border-b border-[#48D1CC]/10">
@@ -26,19 +28,39 @@ export const Navbar = () => {
             <Link to="/contact" className="text-white/80 hover:text-[#48D1CC] transition-colors">Contact</Link>
             
             <div className="flex items-center space-x-4">
-              <Button 
-                variant="ghost"
-                onClick={() => navigate('/auth')}
-                className="text-white hover:text-[#48D1CC] hover:bg-[#48D1CC]/10"
-              >
-                Login
-              </Button>
-              <Button 
-                onClick={() => navigate('/auth')}
-                className="bg-gradient-to-r from-[#48D1CC] to-[#40E0D0] text-[#0A2349] hover:from-[#40E0D0] hover:to-[#48D1CC] shadow-lg shadow-[#48D1CC]/20"
-              >
-                Sign Up
-              </Button>
+              {user ? (
+                <>
+                  <Button 
+                    variant="ghost"
+                    onClick={() => navigate('/dashboard')}
+                    className="text-white hover:text-[#48D1CC] hover:bg-[#48D1CC]/10"
+                  >
+                    Dashboard
+                  </Button>
+                  <Button 
+                    onClick={() => signOut()}
+                    className="bg-gradient-to-r from-[#48D1CC] to-[#40E0D0] text-[#0A2349] hover:from-[#40E0D0] hover:to-[#48D1CC] shadow-lg shadow-[#48D1CC]/20"
+                  >
+                    Sign Out
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button 
+                    variant="ghost"
+                    onClick={() => navigate('/auth')}
+                    className="text-white hover:text-[#48D1CC] hover:bg-[#48D1CC]/10"
+                  >
+                    Login
+                  </Button>
+                  <Button 
+                    onClick={() => navigate('/auth')}
+                    className="bg-gradient-to-r from-[#48D1CC] to-[#40E0D0] text-[#0A2349] hover:from-[#40E0D0] hover:to-[#48D1CC] shadow-lg shadow-[#48D1CC]/20"
+                  >
+                    Sign Up
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
