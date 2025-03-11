@@ -5,6 +5,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 import mockTrendData from "@/data/mockTrendData";
+import { DashboardCard } from "@/components/DashboardCard";
 
 export function AnalyticsDashboard() {
   const [timeframe, setTimeframe] = useState("30days");
@@ -40,6 +41,14 @@ export function AnalyticsDashboard() {
     { name: "Leads", value: Math.floor(totalViews * 0.28), color: "#6E8AFA" },
     { name: "Qualified Leads", value: Math.floor(totalViews * 0.12), color: "#9BABFC" },
     { name: "Opportunities", value: Math.floor(totalViews * 0.05), color: "#BDD0FE" }
+  ];
+  
+  // Content performance by platform
+  const platformPerformanceData = [
+    { name: "YouTube", views: 45000, engagement: 8.2 },
+    { name: "TikTok", views: 65000, engagement: 9.7 },
+    { name: "Instagram", views: 32000, engagement: 6.8 },
+    { name: "Reddit", views: 18000, engagement: 4.3 }
   ];
   
   // Top performing content (using our existing data)
@@ -124,95 +133,96 @@ export function AnalyticsDashboard() {
         </Card>
       </div>
 
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {/* Traffic Trends Chart */}
+      {/* Main Chart - Full Width */}
+      <Card className="p-4 hover:shadow-md transition-shadow mb-6">
+        <div className="font-semibold text-gray-900 mb-1">Traffic Trends</div>
+        <div className="text-sm text-gray-600 mb-4">Daily visitors over the selected period</div>
+        <div className="h-[300px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={trafficTrendsData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <XAxis dataKey="date" stroke="#888" fontSize={12} />
+              <YAxis stroke="#888" fontSize={12} />
+              <Tooltip />
+              <Legend />
+              <Line type="monotone" dataKey="organic" stroke="#4263EB" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} name="Organic" />
+              <Line type="monotone" dataKey="referral" stroke="#F86A6A" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} name="Referral" />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </Card>
+
+      {/* Two small charts and one pie chart in a row */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        {/* Platform Performance Bar Chart */}
         <Card className="p-4 hover:shadow-md transition-shadow">
-          <div className="font-semibold text-gray-900 mb-1">Traffic Trends</div>
-          <div className="text-sm text-gray-600 mb-4">Daily visitors over the selected period</div>
-          <div className="h-[300px]">
+          <div className="font-semibold text-gray-900 mb-4">Platform Performance</div>
+          <div className="h-[200px]">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={trafficTrendsData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="date" stroke="#888" fontSize={12} />
-                <YAxis stroke="#888" fontSize={12} />
+              <BarChart
+                data={platformPerformanceData}
+                layout="vertical"
+                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
+                <XAxis type="number" fontSize={10} />
+                <YAxis type="category" dataKey="name" fontSize={10} width={70} />
                 <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="organic" stroke="#4263EB" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} name="Organic" />
-                <Line type="monotone" dataKey="referral" stroke="#F86A6A" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} name="Referral" />
-              </LineChart>
+                <Bar dataKey="views" fill="#4263EB" name="Views" radius={[0, 4, 4, 0]} />
+              </BarChart>
             </ResponsiveContainer>
           </div>
         </Card>
 
-        {/* Traffic Sources & Conversion Funnel */}
-        <div className="grid grid-cols-1 gap-6">
-          {/* Traffic Sources Pie Chart */}
-          <Card className="p-4 hover:shadow-md transition-shadow">
-            <div className="font-semibold text-gray-900 mb-4">Traffic Sources</div>
-            <div className="flex items-center">
-              <div className="h-[140px] w-[140px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={trafficSourcesData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={40}
-                      outerRadius={60}
-                      paddingAngle={2}
-                      dataKey="value"
-                    >
-                      {trafficSourcesData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => `${value}%`} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="ml-4 flex-1">
-                <div className="text-xl font-semibold flex items-center justify-center">
-                  <span className="text-brand-primary">{totalViews.toLocaleString()}</span>
-                  <span className="text-sm text-gray-500 ml-1">total</span>
-                </div>
-                <div className="mt-4 space-y-2">
-                  {trafficSourcesData.map((source, index) => (
-                    <div key={index} className="flex items-center text-sm">
-                      <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: source.color }}></div>
-                      <div className="text-gray-600">{source.name}</div>
-                      <div className="ml-auto font-medium">{source.value}%</div>
-                    </div>
+        {/* Conversion Funnel */}
+        <Card className="p-4 hover:shadow-md transition-shadow">
+          <div className="font-semibold text-gray-900 mb-4">Conversion Funnel</div>
+          <div className="h-[200px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                layout="vertical"
+                data={funnelData}
+                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                <XAxis type="number" fontSize={10} />
+                <YAxis type="category" dataKey="name" fontSize={10} width={80} />
+                <Tooltip formatter={(value) => value.toLocaleString()} />
+                <Bar dataKey="value" radius={[0, 4, 4, 0]}>
+                  {funnelData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
-                </div>
-              </div>
-            </div>
-          </Card>
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
 
-          {/* Conversion Funnel */}
-          <Card className="p-4 hover:shadow-md transition-shadow">
-            <div className="font-semibold text-gray-900 mb-4">Conversion Funnel</div>
-            <div className="h-[140px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  layout="vertical"
-                  data={funnelData}
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+        {/* Traffic Sources Pie Chart */}
+        <Card className="p-4 hover:shadow-md transition-shadow">
+          <div className="font-semibold text-gray-900 mb-4">Traffic Sources</div>
+          <div className="h-[200px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={trafficSourcesData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={40}
+                  outerRadius={60}
+                  paddingAngle={2}
+                  dataKey="value"
                 >
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                  <XAxis type="number" fontSize={12} stroke="#888" />
-                  <YAxis type="category" dataKey="name" fontSize={12} stroke="#888" width={100} />
-                  <Tooltip formatter={(value) => value.toLocaleString()} />
-                  <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-                    {funnelData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </Card>
-        </div>
+                  {trafficSourcesData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value) => `${value}%`} />
+                <Legend layout="vertical" verticalAlign="middle" align="right" />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
       </div>
 
       {/* Top Performing Content Table */}
