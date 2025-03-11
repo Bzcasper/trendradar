@@ -180,7 +180,7 @@ const mockTrendData: VideoResult[] = [
   {
     id: '8',
     video_id: '_C0fmFsfkTk',
-    title: 'Plant-Based Diet: A Complete Beginner's Guide',
+    title: "Plant-Based Diet: A Complete Beginner's Guide",
     views: 725000,
     likes: 48000,
     comments: 5200,
@@ -209,7 +209,7 @@ const mockTrendData: VideoResult[] = [
     category: 'Technology',
     thumbnail_url: 'https://i.imgur.com/EexQehX.jpeg',
     published_at: '2023-11-30T15:30:00Z',
-    description: 'A comprehensive explanation of Web3, blockchain, and how they're shaping the next generation of the internet.',
+    description: "A comprehensive explanation of Web3, blockchain, and how they're shaping the next generation of the internet.",
     engagement_rate: 7.4,
     view_velocity: 4600,
     trending_score: 78.2,
