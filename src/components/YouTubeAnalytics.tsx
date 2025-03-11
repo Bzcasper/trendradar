@@ -9,7 +9,7 @@ import { format } from "date-fns";
 import { useAuth } from "@/contexts/AuthContext";
 import mockTrendData from "@/data/mockTrendData";
 import { Badge } from "./ui/badge";
-import { TrendingUp, TrendingDown, Search, RefreshCw } from "lucide-react";
+import { TrendingUp, TrendingDown, Search, RefreshCw, ShieldAlert } from "lucide-react";
 import { calculateTrendingScore } from "@/utils/trendingAlgorithm";
 import { fetchMultiPlatformTrends } from "@/utils/apiService";
 import { Button } from "./ui/button";
@@ -160,7 +160,7 @@ export const YouTubeAnalytics = () => {
         <div className="bg-brand-primary/10 border-l-4 border-brand-primary p-4 mb-8 rounded">
           <div className="flex">
             <div className="flex-shrink-0">
-              <Shield className="h-5 w-5 text-brand-primary" />
+              <ShieldAlert className="h-5 w-5 text-brand-primary" />
             </div>
             <div className="ml-3">
               <p className="text-sm text-primary">
@@ -204,7 +204,7 @@ export const YouTubeAnalytics = () => {
       
       <div className="grid grid-cols-1 gap-8">
         {/* Comprehensive Video Details Table */}
-        <DashboardCard title="Trend Analysis Results" className="trend-card">
+        <DashboardCard title="Trend Analysis Results">
           <div className="overflow-auto max-h-[600px]">
             <Table>
               <TableHeader>
@@ -329,7 +329,7 @@ export const YouTubeAnalytics = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Category Distribution Pie Chart */}
-          <DashboardCard title="Category Distribution" className="trend-card">
+          <DashboardCard title="Category Distribution">
             <div className="h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -354,7 +354,7 @@ export const YouTubeAnalytics = () => {
           </DashboardCard>
 
           {/* Views and Velocity Comparison */}
-          <DashboardCard title="Views & Velocity Analysis" className="trend-card">
+          <DashboardCard title="Views & Velocity Analysis">
             <div className="h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={viewsData} margin={{ top: 20, right: 30, left: 20, bottom: 120 }}>
@@ -372,7 +372,7 @@ export const YouTubeAnalytics = () => {
           </DashboardCard>
 
           {/* Engagement Metrics */}
-          <DashboardCard title="Engagement Analysis" className="trend-card">
+          <DashboardCard title="Engagement Analysis">
             <div className="h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={engagementData} margin={{ top: 20, right: 30, left: 20, bottom: 120 }}>
@@ -390,7 +390,7 @@ export const YouTubeAnalytics = () => {
           </DashboardCard>
 
           {/* Trending and Viral Probability */}
-          <DashboardCard title="Trend & Viral Analysis" className="trend-card">
+          <DashboardCard title="Trend & Viral Analysis">
             <div className="h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={engagementData} margin={{ top: 20, right: 30, left: 20, bottom: 120 }}>
@@ -408,7 +408,7 @@ export const YouTubeAnalytics = () => {
         </div>
 
         {/* Add the new Keyword Analysis chart at the bottom */}
-        <DashboardCard title="Keyword Analysis" className="trend-card">
+        <DashboardCard title="Keyword Analysis">
           <div className="w-full h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart

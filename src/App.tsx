@@ -22,6 +22,7 @@ import FAQ from "@/pages/FAQ";
 import HowItWorks from "@/pages/HowItWorks";
 import Pricing from "@/pages/Pricing";
 import Resources from "@/pages/Resources";
+import Dashboard from "@/pages/Dashboard";
 
 export default function App() {
   return (
@@ -33,7 +34,8 @@ export default function App() {
             <main className="flex-1 pt-16">
               <Routes>
                 <Route path="/" element={<Home />} />
-                <Route path="/dashboard" element={<Index />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/trending" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/auth/callback" element={<AuthCallback />} />
                 <Route path="/terms" element={<Terms />} />

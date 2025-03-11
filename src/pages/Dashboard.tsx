@@ -1,15 +1,15 @@
-import { DashboardCard } from "@/components/DashboardCard";
+
+import { useState } from "react";
 import { YouTubeAnalytics } from "@/components/YouTubeAnalytics";
-import { EngagementMetrics } from "@/components/EngagementMetrics";
-import { TrendingTopics } from "@/components/TrendingTopics";
-import { VideoList } from "@/components/VideoList";
-import { UserAnalyticsSection } from "@/components/Dashboard/UserAnalyticsSection";
+import { AnalyticsDashboard } from "@/components/Dashboard/AnalyticsDashboard";
 
 export default function Dashboard() {
   return (
     <div className="container mx-auto py-8 space-y-8">
-      
-      <UserAnalyticsSection />
+      <div className="grid grid-cols-1 gap-8">
+        <AnalyticsDashboard />
+        <YouTubeAnalytics />
+      </div>
     </div>
   );
 }
