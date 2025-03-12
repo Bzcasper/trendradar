@@ -1,6 +1,6 @@
 
-import { useState } from "react";
-import { ChevronRight, ChevronLeft, Plus, GripVertical } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { ChevronRight, ChevronLeft, Plus, GripVertical, GripHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -13,18 +13,67 @@ interface WidgetSidebarProps {
 
 export function WidgetSidebar({ onAddWidget }: WidgetSidebarProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [width, setWidth] = useState(256); // Default expanded width
+  const [isResizing, setIsResizing] = useState(false);
+  const minWidth = 256; // Minimum width when expanded
+  const maxWidth = 400; // Maximum width
+  const sidebarRef = useRef<HTMLDivElement>(null);
+  const resizeHandleRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizing) return;
+      
+      const newWidth = Math.max(
+        minWidth,
+        Math.min(maxWidth, e.clientX)
+      );
+      
+      setWidth(newWidth);
+    };
+    
+    const handleMouseUp = () => {
+      setIsResizing(false);
+      document.body.style.cursor = 'default';
+      document.body.style.userSelect = 'auto';
+    };
+    
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'ew-resize';
+      document.body.style.userSelect = 'none';
+    }
+    
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizing]);
+  
+  const startResizing = () => {
+    setIsResizing(true);
+  };
+  
+  const handleToggleSidebar = () => {
+    setIsExpanded(!isExpanded);
+  };
   
   return (
-    <div className={cn(
-      "fixed left-0 top-16 h-[calc(100vh-64px)] bg-white border-r transition-all duration-300 z-10",
-      isExpanded ? "w-64" : "w-12"
-    )}>
-      <div className="flex flex-col h-full">
+    <div 
+      ref={sidebarRef}
+      className={cn(
+        "fixed left-0 top-16 h-[calc(100vh-64px)] bg-white border-r transition-all duration-300 z-10",
+        isExpanded ? "" : "w-12"
+      )}
+      style={{ width: isExpanded ? `${width}px` : '48px' }}
+    >
+      <div className="flex flex-col h-full relative">
         <div className="flex justify-end p-2">
           <Button 
             variant="ghost" 
             size="icon" 
-            onClick={() => setIsExpanded(!isExpanded)}
+            onClick={handleToggleSidebar}
             className="rounded-full"
           >
             {isExpanded ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
@@ -83,6 +132,19 @@ export function WidgetSidebar({ onAddWidget }: WidgetSidebarProps) {
                 <span className="text-xs font-bold">+{availableWidgets.length - 5}</span>
               </div>
             )}
+          </div>
+        )}
+        
+        {/* Resize handle */}
+        {isExpanded && (
+          <div 
+            ref={resizeHandleRef}
+            className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-blue-100"
+            onMouseDown={startResizing}
+          >
+            <div className="absolute right-0 top-1/2 transform -translate-y-1/2 p-1">
+              <GripHorizontal size={12} className="text-gray-400" />
+            </div>
           </div>
         )}
       </div>
