@@ -19,6 +19,7 @@ export interface TrendingItem {
   rsi?: number;
   relative_volume?: number;
   keywords?: Array<{ keyword: string; count: number }>;
+  fibo_retracement?: number;
 }
 
 export interface ApiEndpoint {
