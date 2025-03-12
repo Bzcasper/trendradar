@@ -54,11 +54,11 @@ export async function analyzeUserContent(
         winner: analyzedContent,
         loser: analyzedContent,
         comparisonFactors: {
-          viewVelocity: { a: 0, b: 0, winner: 'tie' },
-          engagementRate: { a: 0, b: 0, winner: 'tie' },
-          trendAcceleration: { a: 0, b: 0, winner: 'tie' },
-          relativeVolume: { a: 0, b: 0, winner: 'tie' },
-          overallScore: { a: 0, b: 0, winner: 'tie' }
+          viewVelocity: { a: 0, b: 0, winner: 'tie' as const },
+          engagementRate: { a: 0, b: 0, winner: 'tie' as const },
+          trendAcceleration: { a: 0, b: 0, winner: 'tie' as const },
+          relativeVolume: { a: 0, b: 0, winner: 'tie' as const },
+          overallScore: { a: 0, b: 0, winner: 'tie' as const }
         }
       };
   
