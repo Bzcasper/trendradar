@@ -55,11 +55,11 @@ export function DashboardGrid({ widgets, onWidgetsChange, onRemoveWidget, onOpen
       onDragEnd={handleDragEnd}
     >
       <div className="space-y-[1.618rem]">
-        <div className="flex justify-end">
+        <div className="flex justify-end mb-[1.618rem]">
           <Button 
             size="sm" 
             variant="outline" 
-            className="flex items-center gap-1 bg-brand-primary text-white hover:bg-brand-primary/90 border-brand-primary rounded-[0.618rem] px-[1.618rem] py-[0.618rem]" 
+            className="flex items-center gap-1 bg-brand-primary text-white hover:bg-brand-primary/90 border-none rounded-[0.618rem] px-[1.618rem] py-[0.618rem]" 
             onClick={onOpenAddDialog}
           >
             <Plus className="h-4 w-4" />
@@ -68,9 +68,9 @@ export function DashboardGrid({ widgets, onWidgetsChange, onRemoveWidget, onOpen
         </div>
         
         <SortableContext items={widgets.map(widget => widget.id)} strategy={verticalListSortingStrategy}>
-          <div className="grid grid-cols-1 gap-[1.618rem]">
+          <div className="grid grid-cols-1 gap-0">
             {/* Full-width widgets with resizing */}
-            <div className="space-y-[1.618rem]">
+            <div className="space-y-0 mb-[1.618rem]">
               {widgets
                 .filter(widget => widget.size === "full")
                 .map((widget) => (

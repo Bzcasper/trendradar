@@ -21,11 +21,11 @@ export function ResizableWidget({
   onResize, 
   children,
   initialWidth,
-  initialHeight,
+  initialHeight = 250,
   minWidth = 200,
   minHeight = 150
 }: ResizableWidgetProps) {
-  const [size, setSize] = useState({ width: initialWidth || "100%", height: initialHeight || "auto" });
+  const [size, setSize] = useState({ width: initialWidth || "100%", height: initialHeight });
   const [isResizing, setIsResizing] = useState(false);
   const [resizeDirection, setResizeDirection] = useState<string | null>(null);
   const widgetRef = useRef<HTMLDivElement>(null);
@@ -101,13 +101,13 @@ export function ResizableWidget({
     };
   }, []);
   
-  // Resizing handles - follow golden ratio (1.618)
+  // Based on golden ratio (1.618)
   const handleSize = "0.618rem";
   
   return (
     <div 
       ref={widgetRef}
-      className="relative" 
+      className="relative mb-[1.618rem]" 
       style={{ 
         width: typeof size.width === 'number' ? `${size.width}px` : size.width, 
         height: typeof size.height === 'number' ? `${size.height}px` : size.height,
@@ -115,29 +115,29 @@ export function ResizableWidget({
       }}
     >
       <DraggableWidget id={id} title={title} onRemove={onRemove}>
-        <div className="w-full h-full">
+        <div className="w-full h-full overflow-hidden">
           {children}
         </div>
       </DraggableWidget>
       
       {/* Resize handles */}
       <div 
-        className="absolute top-0 right-0 w-[0.618rem] h-[0.618rem] cursor-ne-resize bg-brand-primary/50 hover:bg-brand-primary/80 rounded-tr-[0.382rem] z-20"
+        className="absolute top-0 right-0 cursor-ne-resize bg-brand-primary/50 hover:bg-brand-primary/80 rounded-tr-[0.382rem] z-20"
         style={{ width: handleSize, height: handleSize }}
         onMouseDown={(e) => handleResizeStart(e, 'ne')}
       />
       <div 
-        className="absolute bottom-0 right-0 w-[0.618rem] h-[0.618rem] cursor-se-resize bg-brand-primary/50 hover:bg-brand-primary/80 rounded-br-[0.382rem] z-20"
+        className="absolute bottom-0 right-0 cursor-se-resize bg-brand-primary/50 hover:bg-brand-primary/80 rounded-br-[0.382rem] z-20"
         style={{ width: handleSize, height: handleSize }}
         onMouseDown={(e) => handleResizeStart(e, 'se')}
       />
       <div 
-        className="absolute bottom-0 left-0 w-[0.618rem] h-[0.618rem] cursor-sw-resize bg-brand-primary/50 hover:bg-brand-primary/80 rounded-bl-[0.382rem] z-20"
+        className="absolute bottom-0 left-0 cursor-sw-resize bg-brand-primary/50 hover:bg-brand-primary/80 rounded-bl-[0.382rem] z-20"
         style={{ width: handleSize, height: handleSize }}
         onMouseDown={(e) => handleResizeStart(e, 'sw')}
       />
       <div 
-        className="absolute top-0 left-0 w-[0.618rem] h-[0.618rem] cursor-nw-resize bg-brand-primary/50 hover:bg-brand-primary/80 rounded-tl-[0.382rem] z-20"
+        className="absolute top-0 left-0 cursor-nw-resize bg-brand-primary/50 hover:bg-brand-primary/80 rounded-tl-[0.382rem] z-20"
         style={{ width: handleSize, height: handleSize }}
         onMouseDown={(e) => handleResizeStart(e, 'nw')}
       />

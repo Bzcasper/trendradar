@@ -11,19 +11,15 @@ interface DashboardCardProps {
 export const DashboardCard = ({ title, children, className }: DashboardCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   
-  // Golden ratio: 1.618
-  const headerHeight = "2.618rem";
-  
   return (
     <Card 
-      className={`fade-in relative overflow-hidden widget-card ${className || ""}`}
+      className={`fade-in relative overflow-hidden rounded-[0.618rem] shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 bg-white ${className || ""}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <div 
-        className="widget-header absolute inset-x-0 top-0 z-10 flex items-center px-4 transition-transform duration-300 ease-in-out"
+        className="absolute inset-x-0 top-0 z-10 flex items-center px-4 py-2 bg-gradient-to-r from-brand-primary/95 to-brand-primary/85 text-white transition-transform duration-300 ease-in-out"
         style={{ 
-          height: headerHeight,
           transform: isHovered ? 'translateY(0)' : 'translateY(-100%)'
         }}
       >

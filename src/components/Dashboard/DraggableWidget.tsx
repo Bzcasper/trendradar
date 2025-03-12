@@ -21,22 +21,18 @@ export function DraggableWidget({ id, title, onRemove, children }: DraggableWidg
     transition,
   };
   
-  // Golden ratio: 1.618
-  const headerHeight = "2.618rem";
-  
   return (
     <Card 
       ref={setNodeRef} 
       style={style} 
-      className="relative overflow-hidden widget-card" 
+      className="relative overflow-hidden rounded-[0.618rem] shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 bg-white" 
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Header that slides up/down on hover */}
+      {/* Header that slides up on hover */}
       <div 
-        className="widget-header absolute inset-x-0 top-0 z-10 flex items-center justify-between px-3 transition-transform duration-300 ease-in-out"
+        className="absolute inset-x-0 top-0 z-10 flex items-center justify-between px-3 py-2 bg-gradient-to-r from-brand-primary/95 to-brand-primary/85 text-white transition-transform duration-300 ease-in-out"
         style={{ 
-          height: headerHeight,
           transform: isHovered ? 'translateY(0)' : 'translateY(-100%)'
         }}
       >

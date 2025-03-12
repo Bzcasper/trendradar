@@ -65,7 +65,7 @@ export default function Dashboard() {
   };
   
   return (
-    <div className="min-h-screen dashboard-bg relative">
+    <div className="min-h-screen dashboard-bg relative overflow-x-hidden">
       {activeTab === "customizable" && (
         <WidgetSidebar onAddWidget={handleAddWidget} />
       )}
@@ -99,7 +99,7 @@ export default function Dashboard() {
         </div>
 
         {activeTab === "customizable" ? (
-          <>
+          <div className="shadow-depth-1 bg-white/50 backdrop-blur-sm p-[1.618rem] rounded-[0.618rem] border border-gray-100">
             <DashboardGrid
               widgets={dashboardWidgets}
               onWidgetsChange={setDashboardWidgets}
@@ -111,16 +111,22 @@ export default function Dashboard() {
               onOpenChange={setDialogOpen}
               onAddWidget={handleAddWidget}
             />
-          </>
+          </div>
         ) : activeTab === "platforms" ? (
-          <PlatformAnalytics
-            currentPlatform={currentPlatform}
-            onPlatformChange={setCurrentPlatform}
-          />
+          <div className="shadow-depth-1 bg-white/50 backdrop-blur-sm p-[1.618rem] rounded-[0.618rem] border border-gray-100">
+            <PlatformAnalytics
+              currentPlatform={currentPlatform}
+              onPlatformChange={setCurrentPlatform}
+            />
+          </div>
         ) : (
           <div className="grid grid-cols-1 gap-[1.618rem]">
-            <AnalyticsDashboard />
-            <YouTubeAnalytics />
+            <div className="shadow-depth-1 bg-white/50 backdrop-blur-sm p-[1.618rem] rounded-[0.618rem] border border-gray-100">
+              <AnalyticsDashboard />
+            </div>
+            <div className="shadow-depth-1 bg-white/50 backdrop-blur-sm p-[1.618rem] rounded-[0.618rem] border border-gray-100">
+              <YouTubeAnalytics />
+            </div>
           </div>
         )}
       </div>
