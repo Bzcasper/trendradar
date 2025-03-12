@@ -43,7 +43,12 @@ export function DashboardGrid({ widgets, onWidgetsChange, onRemoveWidget, onOpen
     >
       <div className="space-y-8">
         <div className="flex justify-end">
-          <Button size="sm" variant="outline" className="flex items-center gap-1" onClick={onOpenAddDialog}>
+          <Button 
+            size="sm" 
+            variant="outline" 
+            className="flex items-center gap-1 bg-brand-primary text-white hover:bg-brand-primary/90 border-brand-primary" 
+            onClick={onOpenAddDialog}
+          >
             <Plus className="h-4 w-4" />
             Add Widget
           </Button>
@@ -51,20 +56,24 @@ export function DashboardGrid({ widgets, onWidgetsChange, onRemoveWidget, onOpen
         
         <SortableContext items={widgets.map(widget => widget.id)} strategy={verticalListSortingStrategy}>
           <div className="grid grid-cols-1 gap-6">
-            {widgets
-              .filter(widget => widget.size === "full")
-              .map((widget) => (
-                <DraggableWidget 
-                  key={widget.id} 
-                  id={widget.id} 
-                  title={widget.title}
-                  onRemove={() => onRemoveWidget(widget.id)}
-                >
-                  <DashboardWidgetContent type={widget.type} />
-                </DraggableWidget>
-              ))}
+            {/* Full-width widgets first */}
+            <div className="space-y-6">
+              {widgets
+                .filter(widget => widget.size === "full")
+                .map((widget) => (
+                  <DraggableWidget 
+                    key={widget.id} 
+                    id={widget.id} 
+                    title={widget.title}
+                    onRemove={() => onRemoveWidget(widget.id)}
+                  >
+                    <DashboardWidgetContent type={widget.type} />
+                  </DraggableWidget>
+                ))}
+            </div>
               
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Responsive grid for smaller widgets */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {widgets
                 .filter(widget => widget.size !== "full")
                 .map((widget) => (

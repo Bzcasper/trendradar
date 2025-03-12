@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 // Traffic Trends Widget Icon
@@ -217,3 +216,47 @@ export const TopPerformersIcon = () => (
     <text x="155" y="137.5" fontFamily="Inter, sans-serif" fontSize="10" textAnchor="end" fontWeight="bold" fill="#38B2AC">76.7</text>
   </svg>
 );
+
+// Trend Heatmap Widget Icon
+export const TrendHeatmapIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" className="w-full h-full">
+    <rect x="0" y="0" width="200" height="200" rx="10" fill="#0f172a" stroke="#3b82f6" strokeWidth="2"/>
+    
+    {/* Grid Lines */}
+    <g opacity="0.2" stroke="#fff">
+      <line x1="20" y1="40" x2="180" y2="40" strokeWidth="1" />
+      <line x1="20" y1="80" x2="180" y2="80" strokeWidth="1" />
+      <line x1="20" y1="120" x2="180" y2="120" strokeWidth="1" />
+      <line x1="20" y1="160" x2="180" y2="160" strokeWidth="1" />
+      
+      <line x1="60" y1="30" x2="60" y2="170" strokeWidth="1" />
+      <line x1="100" y1="30" x2="100" y2="170" strokeWidth="1" />
+      <line x1="140" y1="30" x2="140" y2="170" strokeWidth="1" />
+    </g>
+    
+    {/* Wave area fill */}
+    <path d="M20,120 C40,100 60,130 80,90 C100,40 120,60 140,70 C160,90 180,50 180,50 L180,170 L20,170 Z" 
+          fill="#3b82f6" fillOpacity="0.2" />
+    
+    {/* Trend line */}
+    <path d="M20,120 C40,100 60,130 80,90 C100,40 120,60 140,70 C160,90 180,50 180,50" 
+          fill="none" stroke="url(#trendGradientIcon)" strokeWidth="3" strokeLinecap="round" />
+          
+    <defs>
+      <linearGradient id="trendGradientIcon" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stopColor="#3b82f6" />
+        <stop offset="50%" stopColor="#8b5cf6" />
+        <stop offset="100%" stopColor="#ec4899" />
+      </linearGradient>
+    </defs>
+    
+    {/* Data points */}
+    <circle cx="20" cy="120" r="3" fill="#3b82f6" />
+    <circle cx="60" cy="130" r="3" fill="#6366f1" />
+    <circle cx="80" cy="90" r="3" fill="#8b5cf6" />
+    <circle cx="100" cy="40" r="3" fill="#a855f7" />
+    <circle cx="140" cy="70" r="3" fill="#ec4899" />
+    <circle cx="180" cy="50" r="3" fill="#f43f5e" />
+  </svg>
+);
+

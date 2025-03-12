@@ -29,5 +29,6 @@ export const availableWidgets: Array<{ type: WidgetType, title: string }> = [
   { type: "engagementRadar", title: "Engagement Radar" },
   { type: "keywordCloud", title: "Keyword Cloud" },
   { type: "viralPotential", title: "Viral Potential" },
+  { type: "trendHeatmap", title: "Trend Heatmap" },
   { type: "trendPerformance", title: "Trend Performance" }
 ];

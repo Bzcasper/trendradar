@@ -16,6 +16,7 @@ export default function Dashboard() {
     { id: "platform-performance", type: "platformPerformance", title: "Platform Performance" },
     { id: "conversion-funnel", type: "conversionFunnel", title: "Conversion Funnel" },
     { id: "traffic-sources", type: "trafficSources", title: "Traffic Sources" },
+    { id: "trend-heatmap", type: "trendHeatmap", title: "Trend Heatmap", size: "full" },
   ]);
   
   const [activeTab, setActiveTab] = useState<string>("customizable");
@@ -55,7 +56,7 @@ export default function Dashboard() {
           id: `${type}-${nanoid(6)}`,
           type: type,
           title: widget.title,
-          size: type === "trafficTrends" ? "full" : "medium"
+          size: type === "trafficTrends" || type === "trendHeatmap" || type === "trendPerformance" ? "full" : "medium"
         }
       ]);
       setDialogOpen(false);
@@ -63,20 +64,35 @@ export default function Dashboard() {
   };
   
   return (
-    <div className="min-h-screen bg-background relative">
+    <div className="min-h-screen bg-gradient-to-b from-background to-gray-50 relative">
       {activeTab === "customizable" && (
         <WidgetSidebar onAddWidget={handleAddWidget} />
       )}
       
       <div className={`container mx-auto py-8 space-y-8 transition-all ${activeTab === "customizable" ? "ml-12" : "ml-0"}`}>
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Dashboard</h1>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+          <h1 className="text-2xl font-bold text-brand-primary">Dashboard</h1>
           
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList>
-              <TabsTrigger value="customizable">Customizable</TabsTrigger>
-              <TabsTrigger value="standard">Standard</TabsTrigger>
-              <TabsTrigger value="platforms">Platform Analytics</TabsTrigger>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="bg-white rounded-lg shadow-sm">
+            <TabsList className="p-1">
+              <TabsTrigger 
+                value="customizable" 
+                className="data-[state=active]:bg-brand-primary data-[state=active]:text-white"
+              >
+                Customizable
+              </TabsTrigger>
+              <TabsTrigger 
+                value="standard" 
+                className="data-[state=active]:bg-brand-primary data-[state=active]:text-white"
+              >
+                Standard
+              </TabsTrigger>
+              <TabsTrigger 
+                value="platforms" 
+                className="data-[state=active]:bg-brand-primary data-[state=active]:text-white"
+              >
+                Platform Analytics
+              </TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
