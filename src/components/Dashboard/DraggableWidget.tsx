@@ -34,10 +34,12 @@ export function DraggableWidget({ id, title, onRemove, children, isDragging = fa
       className={`relative overflow-hidden rounded-[0.618rem] shadow-sm hover:shadow-md transition-shadow border border-gray-100 bg-white ${isDragging ? 'shadow-lg opacity-80' : ''}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      role="region"
+      aria-labelledby={`widget-title-${id}`}
     >
       {/* Header that slides down on hover */}
       <div 
-        className="absolute inset-x-0 top-0 z-10 flex items-center justify-between px-3 py-2 bg-gradient-to-r from-brand-primary/95 to-brand-primary/85 text-white"
+        className="absolute inset-x-0 top-0 z-10 flex items-center justify-between px-3 py-2 bg-brand-primary text-white"
         style={{ 
           transform: isHovered ? 'translateY(0)' : 'translateY(-100%)',
           transition: 'transform 0.2s ease-out',
@@ -46,21 +48,23 @@ export function DraggableWidget({ id, title, onRemove, children, isDragging = fa
       >
         <div className="flex items-center">
           <div 
-            className="cursor-grab p-1 mr-2 text-white/80 hover:text-white touch-none" 
+            className="cursor-grab p-1 mr-2 text-white hover:text-white touch-none" 
             {...attributes} 
             {...listeners}
+            aria-label={`Drag ${title}`}
           >
-            <GripVertical size={16} />
+            <GripVertical size={16} aria-hidden="true" />
           </div>
-          <h3 className="font-medium text-sm">{title}</h3>
+          <h3 id={`widget-title-${id}`} className="font-medium text-sm">{title}</h3>
         </div>
         
         {onRemove && (
           <button 
             onClick={onRemove}
-            className="p-1 text-white/80 hover:text-white transition-colors"
+            className="p-1 text-white hover:text-white transition-colors"
+            aria-label={`Remove ${title} widget`}
           >
-            <X size={16} />
+            <X size={16} aria-hidden="true" />
           </button>
         )}
       </div>

@@ -1,5 +1,5 @@
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { DraggableWidget } from "./DraggableWidget";
 
 interface ResizableWidgetProps {
@@ -35,7 +35,7 @@ export function ResizableWidget({
   const startSize = useRef({ width: 0, height: 0 });
   
   // Handle resize start
-  const handleResizeStart = (e: React.MouseEvent<HTMLDivElement>, direction: string) => {
+  const handleResizeStart = useCallback((e: React.MouseEvent<HTMLDivElement>, direction: string) => {
     e.preventDefault();
     e.stopPropagation();
     setIsResizing(true);
@@ -51,10 +51,10 @@ export function ResizableWidget({
     
     document.addEventListener('mousemove', handleResize);
     document.addEventListener('mouseup', handleResizeEnd);
-  };
+  }, []);
   
   // Handle resize
-  const handleResize = (e: MouseEvent) => {
+  const handleResize = useCallback((e: MouseEvent) => {
     if (!isResizing || !resizeDirection) return;
     
     e.preventDefault();
@@ -85,15 +85,15 @@ export function ResizableWidget({
     if (onResize) {
       onResize(id, newWidth, newHeight);
     }
-  };
+  }, [isResizing, resizeDirection, minWidth, minHeight, id, onResize]);
   
   // Handle resize end
-  const handleResizeEnd = () => {
+  const handleResizeEnd = useCallback(() => {
     setIsResizing(false);
     setResizeDirection(null);
     document.removeEventListener('mousemove', handleResize);
     document.removeEventListener('mouseup', handleResizeEnd);
-  };
+  }, [handleResize]);
   
   // Clean up event listeners
   useEffect(() => {
@@ -101,10 +101,7 @@ export function ResizableWidget({
       document.removeEventListener('mousemove', handleResize);
       document.removeEventListener('mouseup', handleResizeEnd);
     };
-  }, []);
-  
-  // Based on golden ratio (1.618)
-  const handleSize = "0.618rem";
+  }, [handleResize, handleResizeEnd]);
   
   return (
     <div 
@@ -115,6 +112,7 @@ export function ResizableWidget({
         height: typeof size.height === 'number' ? `${size.height}px` : size.height,
         transition: isResizing || isDragging ? 'none' : 'width 0.3s ease, height 0.3s ease',
       }}
+      aria-label={`${title} widget (resizable)`}
     >
       <DraggableWidget id={id} title={title} onRemove={onRemove} isDragging={isDragging}>
         <div className="w-full h-full overflow-hidden">
@@ -126,18 +124,30 @@ export function ResizableWidget({
       <div 
         className="resizable-handle resizable-handle-ne w-2 h-2"
         onMouseDown={(e) => handleResizeStart(e, 'ne')}
+        aria-label={`Resize ${title} from northeast`}
+        role="button"
+        tabIndex={0}
       />
       <div 
         className="resizable-handle resizable-handle-se w-2 h-2"
         onMouseDown={(e) => handleResizeStart(e, 'se')}
+        aria-label={`Resize ${title} from southeast`}
+        role="button"
+        tabIndex={0}
       />
       <div 
         className="resizable-handle resizable-handle-sw w-2 h-2"
         onMouseDown={(e) => handleResizeStart(e, 'sw')}
+        aria-label={`Resize ${title} from southwest`}
+        role="button"
+        tabIndex={0}
       />
       <div 
         className="resizable-handle resizable-handle-nw w-2 h-2"
         onMouseDown={(e) => handleResizeStart(e, 'nw')}
+        aria-label={`Resize ${title} from northwest`}
+        role="button"
+        tabIndex={0}
       />
     </div>
   );

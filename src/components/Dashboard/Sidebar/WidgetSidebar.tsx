@@ -1,5 +1,5 @@
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { ChevronRight, ChevronLeft, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -24,24 +24,27 @@ export function WidgetSidebar({ onAddWidget }: WidgetSidebarProps) {
   const sidebarRef = useRef<HTMLDivElement>(null);
   const resizeHandleRef = useRef<HTMLDivElement>(null);
   
+  // Handle mouse move during resize
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!isResizing) return;
+    
+    const newWidth = Math.max(
+      minWidth,
+      Math.min(maxWidth, e.clientX)
+    );
+    
+    setWidth(newWidth);
+  }, [isResizing, minWidth, maxWidth]);
+  
+  // Handle mouse up to end resize
+  const handleMouseUp = useCallback(() => {
+    setIsResizing(false);
+    document.body.style.cursor = 'default';
+    document.body.style.userSelect = 'auto';
+  }, []);
+  
+  // Effect for adding/removing event listeners
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isResizing) return;
-      
-      const newWidth = Math.max(
-        minWidth,
-        Math.min(maxWidth, e.clientX)
-      );
-      
-      setWidth(newWidth);
-    };
-    
-    const handleMouseUp = () => {
-      setIsResizing(false);
-      document.body.style.cursor = 'default';
-      document.body.style.userSelect = 'auto';
-    };
-    
     if (isResizing) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
@@ -53,15 +56,20 @@ export function WidgetSidebar({ onAddWidget }: WidgetSidebarProps) {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isResizing]);
+  }, [isResizing, handleMouseMove, handleMouseUp]);
   
-  const startResizing = () => {
+  const startResizing = useCallback(() => {
     setIsResizing(true);
-  };
+  }, []);
   
-  const handleToggleSidebar = () => {
+  const handleToggleSidebar = useCallback(() => {
     setIsExpanded(!isExpanded);
-  };
+  }, [isExpanded]);
+
+  // Handle search query change
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  }, []);
 
   // Filter widgets based on search query
   const filteredWidgets = searchQuery.trim() === "" 
@@ -71,13 +79,14 @@ export function WidgetSidebar({ onAddWidget }: WidgetSidebarProps) {
       );
   
   return (
-    <div 
+    <aside 
       ref={sidebarRef}
       className={cn(
         "fixed left-0 top-16 h-[calc(100vh-64px)] bg-white border-r transition-all duration-300 z-10",
         isExpanded ? "" : "w-12"
       )}
       style={{ width: isExpanded ? `${width}px` : '48px' }}
+      aria-label="Widget sidebar"
     >
       <div className="flex flex-col h-full relative">
         <div className="flex justify-end p-2">
@@ -86,8 +95,9 @@ export function WidgetSidebar({ onAddWidget }: WidgetSidebarProps) {
             size="icon" 
             onClick={handleToggleSidebar}
             className="rounded-full"
+            aria-label={isExpanded ? "Collapse sidebar" : "Expand sidebar"}
           >
-            {isExpanded ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
+            {isExpanded ? <ChevronLeft size={18} aria-hidden="true" /> : <ChevronRight size={18} aria-hidden="true" />}
           </Button>
         </div>
         
@@ -96,7 +106,7 @@ export function WidgetSidebar({ onAddWidget }: WidgetSidebarProps) {
         {isExpanded ? (
           <ExpandedSidebar 
             searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
+            setSearchQuery={handleSearchChange}
             filteredWidgets={filteredWidgets}
             onAddWidget={onAddWidget}
           />
@@ -112,16 +122,18 @@ export function WidgetSidebar({ onAddWidget }: WidgetSidebarProps) {
             ref={resizeHandleRef}
             className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-blue-100"
             onMouseDown={startResizing}
+            aria-label="Resize sidebar"
+            role="separator"
           />
         )}
       </div>
-    </div>
+    </aside>
   );
 }
 
 interface ExpandedSidebarProps {
   searchQuery: string;
-  setSearchQuery: (query: string) => void;
+  setSearchQuery: (e: React.ChangeEvent<HTMLInputElement>) => void;
   filteredWidgets: Array<{ type: WidgetType, title: string }>;
   onAddWidget: (type: WidgetType) => void;
 }
@@ -136,19 +148,20 @@ function ExpandedSidebar({
     <div className="p-4 flex-1 overflow-y-auto">
       <div className="mb-4">
         <div className="relative">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" aria-hidden="true" />
           <Input
             placeholder="Search widgets..."
             className="pl-8"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={setSearchQuery}
+            aria-label="Search widgets"
           />
         </div>
       </div>
       
       {searchQuery.trim() !== "" ? (
         <div className="space-y-2">
-          <h3 className="font-medium mb-2 text-sm text-gray-500">SEARCH RESULTS</h3>
+          <h3 className="font-medium mb-2 text-sm text-gray-700">SEARCH RESULTS</h3>
           {filteredWidgets.length > 0 ? (
             filteredWidgets.map((widget) => (
               <WidgetCard
@@ -159,17 +172,17 @@ function ExpandedSidebar({
               />
             ))
           ) : (
-            <p className="text-sm text-gray-500 py-2">No widgets found</p>
+            <p className="text-sm text-gray-700 py-2">No widgets found</p>
           )}
         </div>
       ) : (
         WIDGET_CATEGORIES.map((category) => (
           <div key={category.name} className="mb-6">
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-5 h-5">
+              <div className="w-5 h-5" aria-hidden="true">
                 <category.icon />
               </div>
-              <h3 className="font-medium text-sm text-gray-500">{category.name.toUpperCase()}</h3>
+              <h3 className="font-medium text-sm text-gray-700">{category.name.toUpperCase()}</h3>
             </div>
             <div className="space-y-2">
               {availableWidgets
@@ -199,6 +212,15 @@ function CollapsedSidebar({ onExpand }: { onExpand: () => void }) {
           className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 cursor-pointer"
           title={widget.title}
           onClick={onExpand}
+          role="button"
+          aria-label={`${widget.title} widget - click to expand sidebar`}
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              onExpand();
+              e.preventDefault();
+            }
+          }}
         >
           {getWidgetIcon(widget.type)}
         </div>
@@ -208,6 +230,15 @@ function CollapsedSidebar({ onExpand }: { onExpand: () => void }) {
           className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 cursor-pointer"
           title="More widgets"
           onClick={onExpand}
+          role="button"
+          aria-label="More widgets - click to expand sidebar"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              onExpand();
+              e.preventDefault();
+            }
+          }}
         >
           <span className="text-xs font-bold">+{availableWidgets.length - 5}</span>
         </div>

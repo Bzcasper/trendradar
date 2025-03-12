@@ -65,6 +65,7 @@ export default function Dashboard() {
     };
   }, [handleScroll]);
   
+  // Handle drag and drop for widgets
   useEffect(() => {
     const handleDragOver = (e: DragEvent) => {
       e.preventDefault();
@@ -89,6 +90,7 @@ export default function Dashboard() {
     };
   }, [activeTab]);
   
+  // Handle adding new widgets
   const handleAddWidget = useCallback((type: WidgetType) => {
     const widget = availableWidgets.find(w => w.type === type);
     if (widget) {
@@ -105,9 +107,14 @@ export default function Dashboard() {
     }
   }, []);
   
+  // Handle tab change
+  const handleTabChange = useCallback((value: string) => {
+    setActiveTab(value);
+  }, []);
+  
   return (
     <div className="min-h-screen dashboard-bg relative overflow-x-hidden pb-20">
-      {/* Custom Navbar Section (Outside of dashboard) */}
+      {/* Custom Navbar Section */}
       <div 
         className="fixed top-0 left-0 right-0 z-50 navbar-fade"
         style={{
@@ -115,6 +122,7 @@ export default function Dashboard() {
           transform: showNavbar ? 'translateY(0)' : 'translateY(-100%)',
           pointerEvents: showNavbar ? 'auto' : 'none'
         }}
+        aria-hidden={!showNavbar}
       >
         <Navbar />
       </div>
@@ -123,11 +131,15 @@ export default function Dashboard() {
         <WidgetSidebar onAddWidget={handleAddWidget} />
       )}
       
-      <div className={`container mx-auto py-8 px-4 sm:px-6 transition-all ${activeTab === "customizable" ? "ml-12" : "ml-0"}`} style={{ marginTop: '64px' }}>
+      <main 
+        className={`container mx-auto py-8 px-4 sm:px-6 transition-all ${activeTab === "customizable" ? "ml-12" : "ml-0"}`} 
+        style={{ marginTop: '64px' }}
+        aria-label="Dashboard content"
+      >
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <h1 className="text-2xl font-bold text-brand-primary">Dashboard</h1>
           
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="glass-morphism rounded-md">
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="glass-morphism rounded-md">
             <TabsList className="p-1">
               <TabsTrigger 
                 value="customizable" 
@@ -152,7 +164,7 @@ export default function Dashboard() {
         </div>
 
         {activeTab === "customizable" ? (
-          <div className="shadow-depth-1 bg-white p-6 rounded-md border border-gray-100">
+          <section className="shadow-depth-1 bg-white p-6 rounded-md border border-gray-100" aria-label="Customizable dashboard">
             <DashboardGrid
               widgets={dashboardWidgets}
               onWidgetsChange={setDashboardWidgets}
@@ -164,25 +176,25 @@ export default function Dashboard() {
               onOpenChange={setDialogOpen}
               onAddWidget={handleAddWidget}
             />
-          </div>
+          </section>
         ) : activeTab === "platforms" ? (
-          <div className="shadow-depth-1 bg-white p-6 rounded-md border border-gray-100">
+          <section className="shadow-depth-1 bg-white p-6 rounded-md border border-gray-100" aria-label="Platform analytics">
             <PlatformAnalytics
               currentPlatform={currentPlatform}
               onPlatformChange={setCurrentPlatform}
             />
-          </div>
+          </section>
         ) : (
           <div className="grid grid-cols-1 gap-6">
-            <div className="shadow-depth-1 bg-white p-6 rounded-md border border-gray-100">
+            <section className="shadow-depth-1 bg-white p-6 rounded-md border border-gray-100" aria-label="Analytics dashboard">
               <AnalyticsDashboard />
-            </div>
-            <div className="shadow-depth-1 bg-white p-6 rounded-md border border-gray-100">
+            </section>
+            <section className="shadow-depth-1 bg-white p-6 rounded-md border border-gray-100" aria-label="YouTube analytics">
               <YouTubeAnalytics />
-            </div>
+            </section>
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }

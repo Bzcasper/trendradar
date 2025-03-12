@@ -98,7 +98,7 @@
 
 /* Resizable widget styles - optimized */
 .resizable-handle {
-  @apply absolute z-20 bg-brand-primary/30 hover:bg-brand-primary/60 transition-colors;
+  @apply absolute z-20 bg-brand-primary/50 hover:bg-brand-primary/80 transition-colors;
   will-change: background-color;
 }
 
@@ -148,7 +148,7 @@
 }
 
 .widget-header {
-  @apply bg-gradient-to-r from-brand-primary/95 to-brand-primary/85 text-white;
+  @apply bg-brand-primary text-white;
 }
 
 /* Navbar animation - optimized for performance */

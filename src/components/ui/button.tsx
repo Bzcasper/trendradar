@@ -41,14 +41,28 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, children, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"
+    
+    // Ensure the button has accessible text content
+    const hasChildren = React.Children.count(children) > 0
+    
+    // Check for aria-label if no children (for icon-only buttons)
+    const hasAccessibleName = hasChildren || (props['aria-label'] !== undefined)
+    
+    // Warning for development
+    if (process.env.NODE_ENV !== 'production' && !hasAccessibleName) {
+      console.warn('Button is missing accessible text. Add children text or an aria-label.')
+    }
+    
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
         {...props}
-      />
+      >
+        {children}
+      </Comp>
     )
   }
 )

@@ -25,7 +25,7 @@ export const SearchBox = ({ onSearch, isLoading }: SearchBoxProps) => {
     <form onSubmit={handleSubmit} className="flex gap-2 max-w-2xl w-full">
       <div className="relative flex-1">
         <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-          <Search className="h-4 w-4 text-muted-foreground" />
+          <Search className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
         </div>
         <Input
           type="text"
@@ -34,6 +34,7 @@ export const SearchBox = ({ onSearch, isLoading }: SearchBoxProps) => {
           onChange={handleChange}
           className="pl-10 pr-4 py-6 transition-colors text-base"
           disabled={isLoading}
+          aria-label="Search query"
         />
       </div>
       <Button 
@@ -41,16 +42,17 @@ export const SearchBox = ({ onSearch, isLoading }: SearchBoxProps) => {
         disabled={isLoading}
         size="lg"
         className="min-w-[120px] bg-brand-primary hover:bg-brand-primary/90"
+        aria-label={isLoading ? "Analyzing trends..." : "Analyze trends"}
       >
         {isLoading ? (
           <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Analyzing
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+            <span>Analyzing</span>
           </>
         ) : (
           <>
-            <Sparkles className="mr-2 h-4 w-4" />
-            Analyze
+            <Sparkles className="mr-2 h-4 w-4" aria-hidden="true" />
+            <span>Analyze</span>
           </>
         )}
       </Button>
