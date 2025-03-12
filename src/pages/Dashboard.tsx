@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { YouTubeAnalytics } from "@/components/YouTubeAnalytics";
 import { AnalyticsDashboard } from "@/components/Dashboard/AnalyticsDashboard";
@@ -9,6 +9,7 @@ import { AddWidgetDialog } from "@/components/Dashboard/AddWidgetDialog";
 import { WidgetSidebar } from "@/components/Dashboard/WidgetSidebar";
 import { WidgetData, WidgetType, availableWidgets } from "@/components/Dashboard/types";
 import { nanoid } from "nanoid";
+import { Navbar } from "@/components/Layout/Navbar";
 
 export default function Dashboard() {
   const [dashboardWidgets, setDashboardWidgets] = useState<WidgetData[]>([
@@ -23,6 +24,34 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<string>("customizable");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [currentPlatform, setCurrentPlatform] = useState<string>("all");
+  const [showNavbar, setShowNavbar] = useState(true);
+  const lastScrollY = useRef(0);
+  
+  // Handle scroll events to show/hide navbar
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY < 10) {
+        // Always show navbar at the top of the page
+        setShowNavbar(true);
+      } else if (currentScrollY < lastScrollY.current) {
+        // Show navbar when scrolling up
+        setShowNavbar(true);
+      } else if (currentScrollY > lastScrollY.current) {
+        // Hide navbar when scrolling down
+        setShowNavbar(false);
+      }
+      
+      lastScrollY.current = currentScrollY;
+    };
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
   
   useEffect(() => {
     const handleDragOver = (e: DragEvent) => {
@@ -65,12 +94,24 @@ export default function Dashboard() {
   };
   
   return (
-    <div className="min-h-screen dashboard-bg relative overflow-x-hidden">
+    <div className="min-h-screen dashboard-bg relative overflow-x-hidden pb-20">
+      {/* Custom Navbar Section (Outside of dashboard) */}
+      <div 
+        className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+        style={{
+          opacity: showNavbar ? 1 : 0,
+          transform: showNavbar ? 'translateY(0)' : 'translateY(-100%)',
+          pointerEvents: showNavbar ? 'auto' : 'none'
+        }}
+      >
+        <Navbar />
+      </div>
+      
       {activeTab === "customizable" && (
         <WidgetSidebar onAddWidget={handleAddWidget} />
       )}
       
-      <div className={`container mx-auto py-8 px-4 sm:px-6 transition-all ${activeTab === "customizable" ? "ml-12" : "ml-0"}`}>
+      <div className={`container mx-auto py-8 px-4 sm:px-6 transition-all ${activeTab === "customizable" ? "ml-12" : "ml-0"}`} style={{ marginTop: '64px' }}>
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <h1 className="text-2xl font-bold text-brand-primary">Dashboard</h1>
           

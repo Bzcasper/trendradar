@@ -10,26 +10,28 @@ interface DraggableWidgetProps {
   title: string;
   onRemove?: () => void;
   children: React.ReactNode;
+  isDragging?: boolean;
 }
 
-export function DraggableWidget({ id, title, onRemove, children }: DraggableWidgetProps) {
+export function DraggableWidget({ id, title, onRemove, children, isDragging = false }: DraggableWidgetProps) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
   const [isHovered, setIsHovered] = useState(false);
   
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
+    transition: isDragging ? 'none' : transition,
+    zIndex: isDragging ? 10 : 'auto',
   };
   
   return (
     <Card 
       ref={setNodeRef} 
       style={style} 
-      className="relative overflow-hidden rounded-[0.618rem] shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 bg-white" 
+      className={`relative overflow-hidden rounded-[0.618rem] shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 bg-white ${isDragging ? 'shadow-lg' : ''}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Header that slides up on hover */}
+      {/* Header that slides down on hover */}
       <div 
         className="absolute inset-x-0 top-0 z-10 flex items-center justify-between px-3 py-2 bg-gradient-to-r from-brand-primary/95 to-brand-primary/85 text-white transition-transform duration-300 ease-in-out"
         style={{ 

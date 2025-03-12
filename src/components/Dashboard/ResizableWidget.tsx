@@ -12,6 +12,7 @@ interface ResizableWidgetProps {
   initialHeight?: number;
   minWidth?: number;
   minHeight?: number;
+  isDragging?: boolean;
 }
 
 export function ResizableWidget({ 
@@ -23,7 +24,8 @@ export function ResizableWidget({
   initialWidth,
   initialHeight = 250,
   minWidth = 200,
-  minHeight = 150
+  minHeight = 150,
+  isDragging = false
 }: ResizableWidgetProps) {
   const [size, setSize] = useState({ width: initialWidth || "100%", height: initialHeight });
   const [isResizing, setIsResizing] = useState(false);
@@ -107,14 +109,14 @@ export function ResizableWidget({
   return (
     <div 
       ref={widgetRef}
-      className="relative mb-4" 
+      className={`relative mb-4 ${isDragging ? 'opacity-75' : ''}`}
       style={{ 
         width: typeof size.width === 'number' ? `${size.width}px` : size.width, 
         height: typeof size.height === 'number' ? `${size.height}px` : size.height,
-        transition: isResizing ? 'none' : 'width 0.3s ease, height 0.3s ease',
+        transition: isResizing || isDragging ? 'none' : 'width 0.3s ease, height 0.3s ease',
       }}
     >
-      <DraggableWidget id={id} title={title} onRemove={onRemove}>
+      <DraggableWidget id={id} title={title} onRemove={onRemove} isDragging={isDragging}>
         <div className="w-full h-full overflow-hidden">
           {children}
         </div>

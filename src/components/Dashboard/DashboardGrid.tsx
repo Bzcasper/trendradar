@@ -1,5 +1,5 @@
 
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, DragStartEvent, DragOverlay } from "@dnd-kit/core";
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { ResizableWidget } from "./ResizableWidget";
 import { DashboardWidgetContent } from "./DashboardWidgetFactory";
@@ -16,25 +16,36 @@ interface DashboardGridProps {
 }
 
 export function DashboardGrid({ widgets, onWidgetsChange, onRemoveWidget, onOpenAddDialog }: DashboardGridProps) {
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [widgetSizes, setWidgetSizes] = useState<Record<string, { width: number, height: number }>>({});
+  
+  // Create more sensitive sensors for smoother dragging
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5, // Reduced distance for activation (more sensitive)
+      }
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
-  
-  const [widgetSizes, setWidgetSizes] = useState<Record<string, { width: number, height: number }>>({});
 
+  const handleDragStart = (event: DragStartEvent) => {
+    const { active } = event;
+    setActiveId(active.id as string);
+  };
+  
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
+    setActiveId(null);
     
     if (active.id !== over?.id && over?.id) {
-      onWidgetsChange(widgets.map(item => {
-        const oldIndex = widgets.findIndex((item) => item.id === active.id);
-        const newIndex = widgets.findIndex((item) => item.id === over.id);
-        
-        return arrayMove(widgets, oldIndex, newIndex);
-      })[0]);
+      const oldIndex = widgets.findIndex((item) => item.id === active.id);
+      const newIndex = widgets.findIndex((item) => item.id === over.id);
+      
+      const newWidgets = arrayMove(widgets, oldIndex, newIndex);
+      onWidgetsChange(newWidgets);
     }
   };
 
@@ -44,11 +55,15 @@ export function DashboardGrid({ widgets, onWidgetsChange, onRemoveWidget, onOpen
       [id]: { width, height }
     }));
   };
+  
+  // Find the active widget
+  const activeWidget = activeId ? widgets.find(widget => widget.id === activeId) : null;
 
   return (
     <DndContext 
       sensors={sensors} 
       collisionDetection={closestCenter} 
+      onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
       <div className="space-y-6">
@@ -78,6 +93,7 @@ export function DashboardGrid({ widgets, onWidgetsChange, onRemoveWidget, onOpen
                     onRemove={() => onRemoveWidget(widget.id)}
                     onResize={handleWidgetResize}
                     initialHeight={300}
+                    isDragging={widget.id === activeId}
                   >
                     <DashboardWidgetContent type={widget.type} />
                   </ResizableWidget>
@@ -96,6 +112,7 @@ export function DashboardGrid({ widgets, onWidgetsChange, onRemoveWidget, onOpen
                     onRemove={() => onRemoveWidget(widget.id)}
                     onResize={handleWidgetResize}
                     initialHeight={250}
+                    isDragging={widget.id === activeId}
                   >
                     <DashboardWidgetContent type={widget.type} />
                   </ResizableWidget>

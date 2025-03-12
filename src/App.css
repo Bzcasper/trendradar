@@ -1,3 +1,4 @@
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -114,6 +115,24 @@
   @apply top-0 left-0 cursor-nw-resize rounded-tl-sm;
 }
 
+/* Drag enhancements */
+[data-dragging="true"] {
+  cursor: grabbing !important;
+  user-select: none;
+  z-index: 999 !important;
+  opacity: 0.8;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* Improved grabbing styles */
+.cursor-grab {
+  cursor: grab;
+}
+
+.cursor-grab:active {
+  cursor: grabbing;
+}
+
 /* Professional dashboard styles */
 .dashboard-bg {
   @apply bg-gradient-to-b from-white to-gray-50;
@@ -125,6 +144,11 @@
 
 .widget-header {
   @apply bg-gradient-to-r from-brand-primary/95 to-brand-primary/85 text-white;
+}
+
+/* Navbar animation */
+.navbar-fade {
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 /* Scrollbar styling */
@@ -161,4 +185,15 @@
 
 .shadow-depth-2 {
   box-shadow: 0 3px 6px rgba(0,0,0,0.07), 0 3px 6px rgba(0,0,0,0.1);
+}
+
+.shadow-depth-3 {
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1), 0 6px 6px rgba(0,0,0,0.1);
+}
+
+/* Improved dragging visual feedback */
+.dragging-component {
+  @apply shadow-depth-3;
+  transform: scale(1.02);
+  z-index: 100;
 }
