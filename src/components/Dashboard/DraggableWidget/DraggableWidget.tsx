@@ -2,81 +2,67 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Card } from "@/components/ui/card";
-import { useState } from "react";
-import { WidgetType } from "../types";
-import { getWidgetColors } from "./utils";
-import { cn } from "@/lib/utils";
+import { useState, useCallback } from "react";
 import { WidgetHeader } from "./WidgetHeader";
-import { WidgetControls } from "./WidgetControls";
 
 interface DraggableWidgetProps {
   id: string;
   title: string;
-  type: WidgetType;
   onRemove?: () => void;
-  onMaximize?: () => void;
   children: React.ReactNode;
+  isDragging?: boolean;
 }
 
-export function DraggableWidget({ 
-  id, 
-  title, 
-  type,
-  onRemove, 
-  onMaximize,
-  children 
-}: DraggableWidgetProps) {
+export function DraggableWidget({ id, title, onRemove, children, isDragging = false }: DraggableWidgetProps) {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
+  const [isHovered, setIsHovered] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const { bg, border } = getWidgetColors(type);
   
-  const { 
-    attributes, 
-    listeners, 
-    setNodeRef, 
-    transform, 
-    transition,
-    isDragging
-  } = useSortable({ id });
+  const handleMouseEnter = useCallback(() => setIsHovered(true), []);
+  const handleMouseLeave = useCallback(() => setIsHovered(false), []);
+  const handleToggleExpand = useCallback(() => setIsExpanded(prev => !prev), []);
   
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
-  };
-  
-  const toggleExpanded = () => {
-    setIsExpanded(!isExpanded);
-    if (onMaximize) onMaximize();
+    transition: isDragging ? 'none' : transition,
+    zIndex: isDragging ? 10 : 'auto',
+    willChange: 'transform, opacity',
   };
   
   return (
     <Card 
       ref={setNodeRef} 
       style={style} 
-      className={cn(
-        "overflow-hidden border-2 transition-all duration-200", 
-        border,
-        isDragging ? "shadow-lg ring-2 ring-blue-300 z-50" : "shadow-sm hover:shadow-md",
-        isExpanded ? "col-span-full row-span-2" : ""
-      )} 
+      className={`relative overflow-hidden rounded-[0.618rem] shadow-sm hover:shadow-md transition-shadow border border-gray-100 bg-white ${isDragging ? 'shadow-lg opacity-80' : ''}`}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      role="region"
+      aria-labelledby={`widget-title-${id}`}
     >
-      <WidgetHeader 
-        title={title}
-        type={type}
-        attributes={attributes}
-        listeners={listeners}
-        bg={bg}
+      {/* Header that slides down on hover */}
+      <div 
+        className="absolute inset-x-0 top-0 z-10 flex items-center justify-between px-3 py-2 bg-brand-primary text-white"
+        style={{ 
+          transform: isHovered ? 'translateY(0)' : 'translateY(-100%)',
+          transition: 'transform 0.2s ease-out',
+          willChange: 'transform',
+        }}
       >
-        <WidgetControls
+        <WidgetHeader 
+          id={id}
+          title={title}
+          // Cast attributes to any here to work around the type issue
+          // This is safe because the dnd-kit library is designed to work with the DOM
+          attributes={attributes as any}
+          listeners={listeners as any}
           isExpanded={isExpanded}
-          onToggleExpand={toggleExpanded}
+          onToggleExpand={handleToggleExpand}
           onRemove={onRemove}
         />
-      </WidgetHeader>
+      </div>
       
-      <div className={cn(
-        "p-4 transition-all",
-        isExpanded ? "h-[500px] overflow-auto" : "h-auto"
-      )}>
+      {/* Content */}
+      <div className="p-4">
         {children}
       </div>
     </Card>

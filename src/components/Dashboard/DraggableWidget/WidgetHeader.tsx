@@ -2,55 +2,45 @@
 import React from "react";
 import { GripVertical } from "lucide-react";
 import { WidgetControls } from "./WidgetControls";
-import { WidgetType } from "../types";
-import { getWidgetIcon, getWidgetColors } from "./utils";
-import { cn } from "@/lib/utils";
 
 interface WidgetHeaderProps {
   id: string;
   title: string;
-  type: WidgetType;
   isExpanded: boolean;
-  onToggleExpanded: () => void;
+  onToggleExpand: () => void;
   onRemove?: () => void;
-  // Replace any with proper types
-  attributes: Record<string, unknown>;
-  listeners: Record<string, unknown>;
+  // Use Record<string, any> to allow any attributes from dnd-kit
+  attributes: Record<string, any>;
+  listeners: Record<string, any>;
 }
 
 export const WidgetHeader: React.FC<WidgetHeaderProps> = ({
   id,
   title,
-  type,
   isExpanded,
-  onToggleExpanded,
+  onToggleExpand,
   onRemove,
   attributes,
   listeners,
 }) => {
-  const { bg } = getWidgetColors(type);
-  
   return (
-    <div className={cn("border-b p-3 flex items-center justify-between", bg)}>
-      <div className="flex items-center flex-1 min-w-0">
-        <div
-          className="cursor-grab p-1 mr-2 text-gray-500 hover:text-gray-700 touch-none"
-          {...attributes}
+    <div className="flex items-center justify-between w-full">
+      <div className="flex items-center">
+        <div 
+          className="cursor-grab p-1 mr-2 text-white hover:text-white touch-none" 
+          {...attributes} 
           {...listeners}
+          aria-label={`Drag ${title}`}
         >
-          <GripVertical size={18} />
+          <GripVertical size={16} aria-hidden="true" />
         </div>
-
-        <div className="w-6 h-6 mr-2 flex-shrink-0">
-          {getWidgetIcon(type)}
-        </div>
-
-        <h3 className="font-medium truncate">{title}</h3>
+        <h3 id={`widget-title-${id}`} className="font-medium text-sm">{title}</h3>
       </div>
-
+      
+      {/* Make sure to use onToggleExpand prop here, not onToggleExpanded */}
       <WidgetControls
         isExpanded={isExpanded}
-        onToggleExpanded={onToggleExpanded}
+        onToggleExpand={onToggleExpand}
         onRemove={onRemove}
       />
     </div>

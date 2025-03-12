@@ -1,13 +1,6 @@
 
 import React from "react";
-import { Maximize2, Minimize2, MoreVertical, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
+import { Maximize2, Minimize2, X } from "lucide-react";
 
 interface WidgetControlsProps {
   isExpanded: boolean;
@@ -17,48 +10,24 @@ interface WidgetControlsProps {
 
 export function WidgetControls({ isExpanded, onToggleExpand, onRemove }: WidgetControlsProps) {
   return (
-    <>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-7 w-7 text-gray-500 hover:text-gray-700"
+    <div className="flex items-center">
+      <button 
         onClick={onToggleExpand}
+        className="p-1 text-white hover:text-white transition-colors"
+        aria-label={isExpanded ? "Minimize widget" : "Maximize widget"}
       >
         {isExpanded ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-      </Button>
-      
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7 text-gray-500 hover:text-gray-700"
-          >
-            <MoreVertical size={16} />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={onToggleExpand}>
-            {isExpanded ? "Minimize" : "Maximize"}
-          </DropdownMenuItem>
-          {onRemove && (
-            <DropdownMenuItem onClick={onRemove} className="text-red-600">
-              Remove
-            </DropdownMenuItem>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+      </button>
       
       {onRemove && (
-        <Button 
-          variant="ghost"
-          size="icon"
+        <button 
           onClick={onRemove}
-          className="h-7 w-7 text-gray-500 hover:text-red-600"
+          className="p-1 text-white hover:text-white transition-colors ml-1"
+          aria-label="Remove widget"
         >
           <X size={16} />
-        </Button>
+        </button>
       )}
-    </>
+    </div>
   );
 }
