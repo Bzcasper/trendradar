@@ -1,122 +1,185 @@
 
-import React from "react";
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export const TrendHeatmapWidget = () => {
+  const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
+  const [isDetailedView, setIsDetailedView] = useState(false);
+  
+  const currentYear = new Date().getFullYear();
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+  const handleCellHover = (month: string) => {
+    setSelectedMonth(month);
+  };
+
   return (
-    <div className="w-full h-full min-h-[300px] flex justify-center items-center overflow-hidden">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" className="w-full h-full">
-        {/* Background with gradient */}
+    <div className="w-full h-full min-h-[500px] flex justify-center items-center p-4 overflow-hidden">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" className="w-full h-full">
         <defs>
-          <linearGradient id="bgGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          {/* Enhanced background gradient with more depth */}
+          <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#0f172a" />
-            <stop offset="100%" stopColor="#1e293b" />
+            <stop offset="50%" stopColor="#1e293b" />
+            <stop offset="100%" stopColor="#0f172a" />
           </linearGradient>
           
-          {/* Trend line gradient */}
-          <linearGradient id="trendGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#3b82f6" />
-            <stop offset="50%" stopColor="#8b5cf6" />
-            <stop offset="100%" stopColor="#ec4899" />
+          {/* Enhanced heatmap gradient with smoother transitions */}
+          <linearGradient id="heatGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#1e293b" />
+            <stop offset="20%" stopColor="#2563eb" />
+            <stop offset="40%" stopColor="#7c3aed" />
+            <stop offset="60%" stopColor="#db2777" />
+            <stop offset="80%" stopColor="#ef4444" />
+            <stop offset="100%" stopColor="#f97316" />
           </linearGradient>
           
-          {/* Wave gradient */}
-          <linearGradient id="waveGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.7" />
-            <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
+          {/* Enhanced card gradient */}
+          <linearGradient id="cardGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#1e293b" stopOpacity="0.9" />
+            <stop offset="100%" stopColor="#0f172a" stopOpacity="0.9" />
           </linearGradient>
           
-          {/* Drop shadow for trend line */}
+          {/* Enhanced glow effect */}
           <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="5" result="blur" />
-            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            <feGaussianBlur stdDeviation="4" result="blur" />
+            <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="glow" />
+            <feComposite in="SourceGraphic" in2="glow" operator="over" />
           </filter>
           
-          {/* Clip path for wave area */}
-          <clipPath id="waveClip">
-            <path d="M0,300 C100,250 200,350 300,200 C400,50 500,100 600,150 C700,200 800,100 800,100 L800,400 L0,400 Z" />
-          </clipPath>
+          {/* Pulse animation */}
+          <filter id="pulse" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="2" />
+            <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" />
+          </filter>
         </defs>
-        
+
         {/* Background */}
-        <rect width="800" height="400" fill="url(#bgGradient)" />
-        
-        {/* Grid lines */}
-        <g opacity="0.1" stroke="#fff">
-          <line x1="0" y1="100" x2="800" y2="100" strokeWidth="1" />
-          <line x1="0" y1="200" x2="800" y2="200" strokeWidth="1" />
-          <line x1="0" y1="300" x2="800" y2="300" strokeWidth="1" />
-          
-          <line x1="100" y1="0" x2="100" y2="400" strokeWidth="1" />
-          <line x1="200" y1="0" x2="200" y2="400" strokeWidth="1" />
-          <line x1="300" y1="0" x2="300" y2="400" strokeWidth="1" />
-          <line x1="400" y1="0" x2="400" y2="400" strokeWidth="1" />
-          <line x1="500" y1="0" x2="500" y2="400" strokeWidth="1" />
-          <line x1="600" y1="0" x2="600" y2="400" strokeWidth="1" />
-          <line x1="700" y1="0" x2="700" y2="400" strokeWidth="1" />
+        <rect width="800" height="500" fill="url(#bgGradient)" />
+
+        {/* Title with enhanced styling */}
+        <g className="title-group" filter="url(#glow)">
+          <text x="50" y="50" fontFamily="Inter, sans-serif" fontSize="24" fontWeight="bold" fill="#ffffff">
+            Trend Activity Heatmap
+          </text>
+          <text x="50" y="80" fontFamily="Inter, sans-serif" fontSize="16" fill="#94a3b8">
+            Engagement distribution over time - {currentYear}
+          </text>
         </g>
-        
-        {/* Wave area fill */}
-        <g clipPath="url(#waveClip)">
-          <rect x="0" y="0" width="800" height="400" fill="url(#waveGradient)" />
+
+        {/* Enhanced Calendar Grid */}
+        <g transform="translate(50, 120)">
+          {months.map((month, i) => (
+            <text
+              key={month}
+              x={75 + (i * 60)}
+              y="0"
+              fontFamily="Inter, sans-serif"
+              fontSize="14"
+              fill="#ffffff"
+              textAnchor="middle"
+              opacity={selectedMonth === month ? "1" : "0.7"}
+              className="transition-opacity duration-200"
+            >
+              {month}
+            </text>
+          ))}
         </g>
-        
-        {/* Trend line */}
-        <path d="M0,300 C100,250 200,350 300,200 C400,50 500,100 600,150 C700,200 800,100 800,100" 
-            fill="none" 
-            stroke="url(#trendGradient)" 
-            strokeWidth="4" 
-            strokeLinecap="round" 
-            filter="url(#glow)" />
-        
-        {/* Data points */}
-        <circle cx="0" cy="300" r="6" fill="#3b82f6" />
-        <circle cx="100" cy="250" r="6" fill="#4f46e5" />
-        <circle cx="200" cy="350" r="6" fill="#8b5cf6" />
-        <circle cx="300" cy="200" r="6" fill="#a855f7" />
-        <circle cx="400" cy="50" r="6" fill="#d946ef" />
-        <circle cx="500" cy="100" r="6" fill="#ec4899" />
-        <circle cx="600" cy="150" r="6" fill="#f43f5e" />
-        <circle cx="700" cy="200" r="6" fill="#f43f5e" />
-        <circle cx="800" cy="100" r="6" fill="#f43f5e" />
-        
-        {/* Highlight animations */}
-        <circle cx="400" cy="50" r="10" fill="none" stroke="#d946ef" strokeWidth="2" opacity="0.8">
-          <animate attributeName="r" values="8;15;8" dur="2s" repeatCount="indefinite" />
-          <animate attributeName="opacity" values="0.8;0.2;0.8" dur="2s" repeatCount="indefinite" />
-        </circle>
-        
-        <circle cx="800" cy="100" r="10" fill="none" stroke="#f43f5e" strokeWidth="2" opacity="0.8">
-          <animate attributeName="r" values="8;15;8" dur="2s" repeatCount="indefinite" begin="0.5s" />
-          <animate attributeName="opacity" values="0.8;0.2;0.8" dur="2s" repeatCount="indefinite" begin="0.5s" />
-        </circle>
-        
-        {/* Labels */}
-        <text x="20" y="30" fill="#fff" fontFamily="Arial, sans-serif" fontSize="20" fontWeight="bold">Trend Performance</text>
-        <text x="20" y="55" fill="#a1a1aa" fontFamily="Arial, sans-serif" fontSize="14">Real-time performance metrics</text>
-        
-        {/* Peak Indicator */}
-        <g transform="translate(400, 25)">
-          <text x="0" y="0" fill="#d946ef" fontFamily="Arial, sans-serif" fontSize="14" textAnchor="middle">Peak</text>
-          <line x1="0" y1="5" x2="0" y2="15" stroke="#d946ef" strokeWidth="2" strokeDasharray="2" />
+
+        {/* Enhanced Day Labels */}
+        <g transform="translate(25, 150)" fontFamily="Inter, sans-serif" fontSize="12" fill="#94a3b8">
+          {days.map((day, i) => (
+            <text key={day} x="0" y={15 + (i * 30)} textAnchor="start">{day}</text>
+          ))}
         </g>
-        
-        {/* Growth Indicator */}
-        <g transform="translate(750, 120)">
-          <text x="0" y="0" fill="#f43f5e" fontFamily="Arial, sans-serif" fontSize="14" textAnchor="end">+48.2%</text>
-          <path d="M-50,-15 L-40,-25 L-30,-15" fill="none" stroke="#f43f5e" strokeWidth="2" />
+
+        {/* Enhanced Calendar Heatmap Cells */}
+        <g transform="translate(50, 130)">
+          {months.map((month, monthIndex) => (
+            <g key={month}>
+              {days.map((day, dayIndex) => (
+                <rect
+                  key={`${month}-${day}`}
+                  x={60 + (monthIndex * 60)}
+                  y={dayIndex * 30}
+                  width="30"
+                  height="30"
+                  rx="3"
+                  fill={`url(#heatGradient)`}
+                  opacity={0.1 + (Math.random() * 0.9)}
+                  className="transition-all duration-300"
+                  onMouseEnter={() => handleCellHover(month)}
+                  onMouseLeave={() => setSelectedMonth(null)}
+                  filter={selectedMonth === month ? "url(#glow)" : "none"}
+                >
+                  <animate
+                    attributeName="opacity"
+                    values={selectedMonth === month ? "0.4;0.8;0.4" : ""}
+                    dur="2s"
+                    repeatCount="indefinite"
+                  />
+                </rect>
+              ))}
+            </g>
+          ))}
         </g>
-        
-        {/* Time indicators */}
-        <g fill="#a1a1aa" fontFamily="Arial, sans-serif" fontSize="12">
-          <text x="0" y="380" textAnchor="middle">Jan</text>
-          <text x="100" y="380" textAnchor="middle">Feb</text>
-          <text x="200" y="380" textAnchor="middle">Mar</text>
-          <text x="300" y="380" textAnchor="middle">Apr</text>
-          <text x="400" y="380" textAnchor="middle">May</text>
-          <text x="500" y="380" textAnchor="middle">Jun</text>
-          <text x="600" y="380" textAnchor="middle">Jul</text>
-          <text x="700" y="380" textAnchor="middle">Aug</text>
-          <text x="800" y="380" textAnchor="middle">Sep</text>
+
+        {/* Enhanced Legend */}
+        <g transform="translate(50, 360)">
+          <text x="0" y="0" fontFamily="Inter, sans-serif" fontSize="14" fill="#ffffff">Activity Level</text>
+          <rect x="0" y="10" width="600" height="20" rx="3" fill="url(#heatGradient)" />
+          <text x="0" y="50" fontFamily="Inter, sans-serif" fontSize="12" fill="#94a3b8">Low</text>
+          <text x="590" y="50" fontFamily="Inter, sans-serif" fontSize="12" fill="#94a3b8" textAnchor="end">High</text>
+        </g>
+
+        {/* Enhanced Stats Cards */}
+        <g transform="translate(50, 420)" className="stats-cards">
+          {[
+            { title: "PEAK ACTIVITY DAY", value: "Jul 15, 2023" },
+            { title: "MOST ACTIVE MONTH", value: "July 2023" },
+            { title: "TOTAL ACTIVITIES", value: "12,487" },
+          ].map((stat, i) => (
+            <g key={stat.title} transform={`translate(${i * 200}, 0)`}>
+              <rect
+                x="0"
+                y="0"
+                width="180"
+                height="60"
+                rx="5"
+                fill="url(#cardGradient)"
+                className="transition-all duration-300"
+              />
+              <text x="15" y="25" fontFamily="Inter, sans-serif" fontSize="14" fill="#94a3b8">
+                {stat.title}
+              </text>
+              <text x="15" y="45" fontFamily="Inter, sans-serif" fontSize="18" fontWeight="bold" fill="#ffffff">
+                {stat.value}
+              </text>
+            </g>
+          ))}
+
+          {/* Enhanced Detail View Button */}
+          <g transform="translate(600, 0)" onClick={() => setIsDetailedView(!isDetailedView)}>
+            <rect
+              x="0"
+              y="0"
+              width="110"
+              height="60"
+              rx="5"
+              fill="#ef4444"
+              opacity="0.2"
+              stroke="#ef4444"
+              strokeWidth="2"
+              className="cursor-pointer transition-all duration-300 hover:opacity-30"
+            />
+            <text x="55" y="30" fontFamily="Inter, sans-serif" fontSize="12" fill="#94a3b8" textAnchor="middle">
+              SHOW
+            </text>
+            <text x="55" y="45" fontFamily="Inter, sans-serif" fontSize="12" fill="#ffffff" textAnchor="middle">
+              DETAILED VIEW
+            </text>
+          </g>
         </g>
       </svg>
     </div>
