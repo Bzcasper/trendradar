@@ -1,11 +1,12 @@
 
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { DraggableWidget } from "./DraggableWidget";
+import { ResizableWidget } from "./ResizableWidget";
 import { DashboardWidgetContent } from "./DashboardWidgetFactory";
 import { WidgetData } from "./types";
 import { Button } from "../ui/button";
 import { Plus } from "lucide-react";
+import { useState } from "react";
 
 interface DashboardGridProps {
   widgets: WidgetData[];
@@ -21,6 +22,8 @@ export function DashboardGrid({ widgets, onWidgetsChange, onRemoveWidget, onOpen
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
+  
+  const [widgetSizes, setWidgetSizes] = useState<Record<string, { width: number, height: number }>>({});
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -33,6 +36,13 @@ export function DashboardGrid({ widgets, onWidgetsChange, onRemoveWidget, onOpen
         return arrayMove(widgets, oldIndex, newIndex);
       })[0]);
     }
+  };
+
+  const handleWidgetResize = (id: string, width: number, height: number) => {
+    setWidgetSizes(prev => ({
+      ...prev,
+      [id]: { width, height }
+    }));
   };
 
   // Golden ratio spacing: 1.618rem
@@ -59,35 +69,39 @@ export function DashboardGrid({ widgets, onWidgetsChange, onRemoveWidget, onOpen
         
         <SortableContext items={widgets.map(widget => widget.id)} strategy={verticalListSortingStrategy}>
           <div className="grid grid-cols-1 gap-[1.618rem]">
-            {/* Full-width widgets first */}
-            <div style={{ gap: spacing }} className="space-y-0 mb-[1.618rem]">
+            {/* Full-width widgets with resizing */}
+            <div style={{ gap: spacing }} className="space-y-[1.618rem]">
               {widgets
                 .filter(widget => widget.size === "full")
                 .map((widget) => (
-                  <DraggableWidget 
+                  <ResizableWidget 
                     key={widget.id} 
                     id={widget.id} 
                     title={widget.title}
                     onRemove={() => onRemoveWidget(widget.id)}
+                    onResize={handleWidgetResize}
+                    initialHeight={300}
                   >
                     <DashboardWidgetContent type={widget.type} />
-                  </DraggableWidget>
+                  </ResizableWidget>
                 ))}
             </div>
               
-            {/* Responsive grid for smaller widgets */}
+            {/* Responsive grid for smaller widgets with resizing */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[1.618rem]">
               {widgets
                 .filter(widget => widget.size !== "full")
                 .map((widget) => (
-                  <DraggableWidget 
+                  <ResizableWidget 
                     key={widget.id} 
                     id={widget.id} 
                     title={widget.title}
                     onRemove={() => onRemoveWidget(widget.id)}
+                    onResize={handleWidgetResize}
+                    initialHeight={250}
                   >
                     <DashboardWidgetContent type={widget.type} />
-                  </DraggableWidget>
+                  </ResizableWidget>
                 ))}
             </div>
           </div>

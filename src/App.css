@@ -94,6 +94,37 @@
 .fib-rounded-lg { border-radius: 1.618rem; }
 .fib-rounded-xl { border-radius: 2.618rem; }
 
+/* Resizable widget styles */
+.resizable-handle {
+  @apply absolute z-20 bg-brand-primary/50 hover:bg-brand-primary/80 transition-colors duration-200;
+}
+
+.resizable-handle-ne {
+  @apply top-0 right-0 cursor-ne-resize rounded-tr-[0.382rem];
+}
+
+.resizable-handle-se {
+  @apply bottom-0 right-0 cursor-se-resize rounded-br-[0.382rem];
+}
+
+.resizable-handle-sw {
+  @apply bottom-0 left-0 cursor-sw-resize rounded-bl-[0.382rem];
+}
+
+.resizable-handle-nw {
+  @apply top-0 left-0 cursor-nw-resize rounded-tl-[0.382rem];
+}
+
+/* Slide-up header animation */
+.slide-up-header {
+  transform: translateY(-100%);
+  transition: transform 0.3s ease-in-out;
+}
+
+.slide-up-header-container:hover .slide-up-header {
+  transform: translateY(0);
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;
