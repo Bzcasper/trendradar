@@ -1,4 +1,5 @@
 
+import React from "react";
 import { WidgetType } from "../types";
 import { 
   TrafficTrendsIcon,
@@ -14,34 +15,35 @@ import {
   TrendRadarIcon
 } from '../WidgetIcons';
 
-export const getWidgetIcon = (type: WidgetType): JSX.Element => {
+// Returns the appropriate icon component for a widget type
+export const getWidgetIcon = (type: WidgetType) => {
   switch (type) {
     case "trafficTrends":
-      return <TrafficTrendsIcon />;
+      return React.createElement(TrafficTrendsIcon);
     case "trafficSources":
-      return <TrafficSourcesIcon />;
+      return React.createElement(TrafficSourcesIcon);
     case "conversionFunnel":
-      return <ConversionFunnelIcon />;
+      return React.createElement(ConversionFunnelIcon);
     case "platformPerformance":
-      return <PlatformPerformanceIcon />;
+      return React.createElement(PlatformPerformanceIcon);
     case "keyMetrics":
-      return <KeyMetricsIcon />;
+      return React.createElement(KeyMetricsIcon);
     case "topPerformers":
-      return <TopPerformersIcon />;
+      return React.createElement(TopPerformersIcon);
     case "engagementRadar":
-      return <EngagementRadarIcon />;
+      return React.createElement(EngagementRadarIcon);
     case "keywordCloud":
-      return <KeywordCloudIcon />;
+      return React.createElement(KeywordCloudIcon);
     case "viralPotential":
-      return <ViralPotentialIcon />;
+      return React.createElement(ViralPotentialIcon);
     case "trendHeatmap":
-      return <TrendHeatmapIcon />;
+      return React.createElement(TrendHeatmapIcon);
     case "trendRadar":
-      return <TrendRadarIcon />;
+      return React.createElement(TrendRadarIcon);
     case "trendPerformance":
-      return <TrafficTrendsIcon />;
+      return React.createElement(TrafficTrendsIcon);
     default:
-      return <div className="w-8 h-8 bg-gray-200 rounded-full" />;
+      return React.createElement("div", { className: "w-8 h-8 bg-gray-200 rounded-full" });
   }
 };
 
