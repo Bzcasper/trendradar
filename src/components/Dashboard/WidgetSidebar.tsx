@@ -1,12 +1,22 @@
-
 import { useState, useRef, useEffect } from "react";
-import { ChevronRight, ChevronLeft, Plus, GripVertical, GripHorizontal, Search, FileBarChart, BarChart2, TrendingUp, Eye, Hash, Zap, Activity, Radio, BookOpen } from "lucide-react";
+import { ChevronRight, ChevronLeft, Plus, GripVertical, GripHorizontal, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { availableWidgets, WidgetType } from "./DashboardWidgetFactory";
+import { availableWidgets, WidgetType } from "./types";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
+import {
+  TrafficTrendsIcon,
+  TrafficSourcesIcon,
+  ConversionFunnelIcon,
+  PlatformPerformanceIcon,
+  KeyMetricsIcon,
+  TopPerformersIcon,
+  EngagementRadarIcon,
+  KeywordCloudIcon,
+  ViralPotentialIcon
+} from "./WidgetIcons";
 
 interface WidgetSidebarProps {
   onAddWidget: (type: WidgetType) => void;
@@ -16,17 +26,17 @@ interface WidgetSidebarProps {
 const WIDGET_CATEGORIES = [
   {
     name: "Analytics",
-    icon: FileBarChart,
+    icon: KeyMetricsIcon,
     widgets: ["trafficTrends", "trafficSources", "conversionFunnel", "platformPerformance"]
   },
   {
     name: "Engagement",
-    icon: Activity,
+    icon: EngagementRadarIcon,
     widgets: ["keyMetrics", "engagementRadar", "topPerformers"]
   },
   {
     name: "Content",
-    icon: BookOpen,
+    icon: KeywordCloudIcon,
     widgets: ["keywordCloud", "viralPotential"]
   }
 ];
@@ -89,15 +99,15 @@ export function WidgetSidebar({ onAddWidget }: WidgetSidebarProps) {
   
   const getWidgetIcon = (type: WidgetType) => {
     switch (type) {
-      case "trafficTrends": return <TrendingUp size={16} className="text-blue-500" />;
-      case "trafficSources": return <Radio size={16} className="text-orange-500" />;
-      case "conversionFunnel": return <BarChart2 size={16} className="text-green-500" />;
-      case "platformPerformance": return <Activity size={16} className="text-purple-500" />;
-      case "keyMetrics": return <FileBarChart size={16} className="text-red-500" />;
-      case "topPerformers": return <Zap size={16} className="text-yellow-500" />;
-      case "engagementRadar": return <Eye size={16} className="text-pink-500" />;
-      case "keywordCloud": return <Hash size={16} className="text-indigo-500" />;
-      case "viralPotential": return <TrendingUp size={16} className="text-teal-500" />;
+      case "trafficTrends": return <div className="w-6 h-6"><TrafficTrendsIcon /></div>;
+      case "trafficSources": return <div className="w-6 h-6"><TrafficSourcesIcon /></div>;
+      case "conversionFunnel": return <div className="w-6 h-6"><ConversionFunnelIcon /></div>;
+      case "platformPerformance": return <div className="w-6 h-6"><PlatformPerformanceIcon /></div>;
+      case "keyMetrics": return <div className="w-6 h-6"><KeyMetricsIcon /></div>;
+      case "topPerformers": return <div className="w-6 h-6"><TopPerformersIcon /></div>;
+      case "engagementRadar": return <div className="w-6 h-6"><EngagementRadarIcon /></div>;
+      case "keywordCloud": return <div className="w-6 h-6"><KeywordCloudIcon /></div>;
+      case "viralPotential": return <div className="w-6 h-6"><ViralPotentialIcon /></div>;
       default: return <Plus size={16} className="text-gray-400" />;
     }
   };
@@ -171,7 +181,9 @@ export function WidgetSidebar({ onAddWidget }: WidgetSidebarProps) {
               WIDGET_CATEGORIES.map((category) => (
                 <div key={category.name} className="mb-6">
                   <div className="flex items-center gap-2 mb-2">
-                    <category.icon size={16} className="text-gray-600" />
+                    <div className="w-5 h-5">
+                      <category.icon />
+                    </div>
                     <h3 className="font-medium text-sm text-gray-500">{category.name.toUpperCase()}</h3>
                   </div>
                   <div className="space-y-2">
