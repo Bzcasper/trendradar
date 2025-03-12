@@ -1,12 +1,12 @@
 
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, DragStartEvent, DragOverlay } from "@dnd-kit/core";
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { ResizableWidget } from "./ResizableWidget";
 import { DashboardWidgetContent } from "./DashboardWidgetFactory";
 import { WidgetData } from "./types";
 import { Button } from "../ui/button";
 import { Plus } from "lucide-react";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 
 interface DashboardGridProps {
   widgets: WidgetData[];
@@ -31,12 +31,12 @@ export function DashboardGrid({ widgets, onWidgetsChange, onRemoveWidget, onOpen
     })
   );
 
-  const handleDragStart = (event: DragStartEvent) => {
+  const handleDragStart = useCallback((event: DragStartEvent) => {
     const { active } = event;
     setActiveId(active.id as string);
-  };
+  }, []);
   
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
     setActiveId(null);
     
@@ -47,18 +47,19 @@ export function DashboardGrid({ widgets, onWidgetsChange, onRemoveWidget, onOpen
       const newWidgets = arrayMove(widgets, oldIndex, newIndex);
       onWidgetsChange(newWidgets);
     }
-  };
+  }, [widgets, onWidgetsChange]);
 
-  const handleWidgetResize = (id: string, width: number, height: number) => {
+  const handleWidgetResize = useCallback((id: string, width: number, height: number) => {
     setWidgetSizes(prev => ({
       ...prev,
       [id]: { width, height }
     }));
-  };
+  }, []);
   
-  // Find the active widget
-  const activeWidget = activeId ? widgets.find(widget => widget.id === activeId) : null;
-
+  // Memoize full-width and smaller widgets to prevent unnecessary re-renders
+  const fullWidthWidgets = widgets.filter(widget => widget.size === "full");
+  const smallerWidgets = widgets.filter(widget => widget.size !== "full");
+  
   return (
     <DndContext 
       sensors={sensors} 
@@ -83,40 +84,36 @@ export function DashboardGrid({ widgets, onWidgetsChange, onRemoveWidget, onOpen
           <div className="grid grid-cols-1 gap-6">
             {/* Full-width widgets with resizing */}
             <div className="space-y-6">
-              {widgets
-                .filter(widget => widget.size === "full")
-                .map((widget) => (
-                  <ResizableWidget 
-                    key={widget.id} 
-                    id={widget.id} 
-                    title={widget.title}
-                    onRemove={() => onRemoveWidget(widget.id)}
-                    onResize={handleWidgetResize}
-                    initialHeight={300}
-                    isDragging={widget.id === activeId}
-                  >
-                    <DashboardWidgetContent type={widget.type} />
-                  </ResizableWidget>
-                ))}
+              {fullWidthWidgets.map((widget) => (
+                <ResizableWidget 
+                  key={widget.id} 
+                  id={widget.id} 
+                  title={widget.title}
+                  onRemove={() => onRemoveWidget(widget.id)}
+                  onResize={handleWidgetResize}
+                  initialHeight={300}
+                  isDragging={widget.id === activeId}
+                >
+                  <DashboardWidgetContent type={widget.type} />
+                </ResizableWidget>
+              ))}
             </div>
               
             {/* Responsive grid for smaller widgets with resizing */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {widgets
-                .filter(widget => widget.size !== "full")
-                .map((widget) => (
-                  <ResizableWidget 
-                    key={widget.id} 
-                    id={widget.id} 
-                    title={widget.title}
-                    onRemove={() => onRemoveWidget(widget.id)}
-                    onResize={handleWidgetResize}
-                    initialHeight={250}
-                    isDragging={widget.id === activeId}
-                  >
-                    <DashboardWidgetContent type={widget.type} />
-                  </ResizableWidget>
-                ))}
+              {smallerWidgets.map((widget) => (
+                <ResizableWidget 
+                  key={widget.id} 
+                  id={widget.id} 
+                  title={widget.title}
+                  onRemove={() => onRemoveWidget(widget.id)}
+                  onResize={handleWidgetResize}
+                  initialHeight={250}
+                  isDragging={widget.id === activeId}
+                >
+                  <DashboardWidgetContent type={widget.type} />
+                </ResizableWidget>
+              ))}
             </div>
           </div>
         </SortableContext>
