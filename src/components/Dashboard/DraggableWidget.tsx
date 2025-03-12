@@ -3,7 +3,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Card } from "@/components/ui/card";
 import { GripVertical, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 
 interface DraggableWidgetProps {
   id: string;
@@ -17,25 +17,31 @@ export function DraggableWidget({ id, title, onRemove, children, isDragging = fa
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
   const [isHovered, setIsHovered] = useState(false);
   
+  const handleMouseEnter = useCallback(() => setIsHovered(true), []);
+  const handleMouseLeave = useCallback(() => setIsHovered(false), []);
+  
   const style = {
     transform: CSS.Transform.toString(transform),
     transition: isDragging ? 'none' : transition,
     zIndex: isDragging ? 10 : 'auto',
+    willChange: 'transform, opacity',
   };
   
   return (
     <Card 
       ref={setNodeRef} 
       style={style} 
-      className={`relative overflow-hidden rounded-[0.618rem] shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 bg-white ${isDragging ? 'shadow-lg' : ''}`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      className={`relative overflow-hidden rounded-[0.618rem] shadow-sm hover:shadow-md transition-shadow border border-gray-100 bg-white ${isDragging ? 'shadow-lg opacity-80' : ''}`}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       {/* Header that slides down on hover */}
       <div 
-        className="absolute inset-x-0 top-0 z-10 flex items-center justify-between px-3 py-2 bg-gradient-to-r from-brand-primary/95 to-brand-primary/85 text-white transition-transform duration-300 ease-in-out"
+        className="absolute inset-x-0 top-0 z-10 flex items-center justify-between px-3 py-2 bg-gradient-to-r from-brand-primary/95 to-brand-primary/85 text-white"
         style={{ 
-          transform: isHovered ? 'translateY(0)' : 'translateY(-100%)'
+          transform: isHovered ? 'translateY(0)' : 'translateY(-100%)',
+          transition: 'transform 0.2s ease-out',
+          willChange: 'transform',
         }}
       >
         <div className="flex items-center">
@@ -52,7 +58,7 @@ export function DraggableWidget({ id, title, onRemove, children, isDragging = fa
         {onRemove && (
           <button 
             onClick={onRemove}
-            className="p-1 text-white/80 hover:text-white"
+            className="p-1 text-white/80 hover:text-white transition-colors"
           >
             <X size={16} />
           </button>

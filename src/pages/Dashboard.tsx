@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { YouTubeAnalytics } from "@/components/YouTubeAnalytics";
 import { AnalyticsDashboard } from "@/components/Dashboard/AnalyticsDashboard";
@@ -26,32 +26,44 @@ export default function Dashboard() {
   const [currentPlatform, setCurrentPlatform] = useState<string>("all");
   const [showNavbar, setShowNavbar] = useState(true);
   const lastScrollY = useRef(0);
+  const scrollTimer = useRef<number | null>(null);
   
-  // Handle scroll events to show/hide navbar
+  // Handle scroll events to show/hide navbar with throttling
+  const handleScroll = useCallback(() => {
+    const currentScrollY = window.scrollY;
+    
+    if (currentScrollY < 10) {
+      // Always show navbar at the top of the page
+      setShowNavbar(true);
+    } else if (currentScrollY < lastScrollY.current) {
+      // Show navbar when scrolling up
+      setShowNavbar(true);
+    } else if (currentScrollY > lastScrollY.current) {
+      // Hide navbar when scrolling down
+      setShowNavbar(false);
+    }
+    
+    lastScrollY.current = currentScrollY;
+  }, []);
+  
+  // Optimized scroll handler with throttling
   useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      
-      if (currentScrollY < 10) {
-        // Always show navbar at the top of the page
-        setShowNavbar(true);
-      } else if (currentScrollY < lastScrollY.current) {
-        // Show navbar when scrolling up
-        setShowNavbar(true);
-      } else if (currentScrollY > lastScrollY.current) {
-        // Hide navbar when scrolling down
-        setShowNavbar(false);
+    const throttledScrollHandler = () => {
+      if (scrollTimer.current === null) {
+        scrollTimer.current = window.setTimeout(() => {
+          handleScroll();
+          scrollTimer.current = null;
+        }, 100); // Throttle to once per 100ms
       }
-      
-      lastScrollY.current = currentScrollY;
     };
     
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('scroll', throttledScrollHandler, { passive: true });
     
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('scroll', throttledScrollHandler);
+      if (scrollTimer.current) clearTimeout(scrollTimer.current);
     };
-  }, []);
+  }, [handleScroll]);
   
   useEffect(() => {
     const handleDragOver = (e: DragEvent) => {
@@ -77,11 +89,11 @@ export default function Dashboard() {
     };
   }, [activeTab]);
   
-  const handleAddWidget = (type: WidgetType) => {
+  const handleAddWidget = useCallback((type: WidgetType) => {
     const widget = availableWidgets.find(w => w.type === type);
     if (widget) {
-      setDashboardWidgets([
-        ...dashboardWidgets,
+      setDashboardWidgets(prev => [
+        ...prev,
         {
           id: `${type}-${nanoid(6)}`,
           type: type,
@@ -91,13 +103,13 @@ export default function Dashboard() {
       ]);
       setDialogOpen(false);
     }
-  };
+  }, []);
   
   return (
     <div className="min-h-screen dashboard-bg relative overflow-x-hidden pb-20">
       {/* Custom Navbar Section (Outside of dashboard) */}
       <div 
-        className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+        className="fixed top-0 left-0 right-0 z-50 navbar-fade"
         style={{
           opacity: showNavbar ? 1 : 0,
           transform: showNavbar ? 'translateY(0)' : 'translateY(-100%)',
@@ -144,7 +156,7 @@ export default function Dashboard() {
             <DashboardGrid
               widgets={dashboardWidgets}
               onWidgetsChange={setDashboardWidgets}
-              onRemoveWidget={(id) => setDashboardWidgets(dashboardWidgets.filter(w => w.id !== id))}
+              onRemoveWidget={(id) => setDashboardWidgets(prev => prev.filter(w => w.id !== id))}
               onOpenAddDialog={() => setDialogOpen(true)}
             />
             <AddWidgetDialog

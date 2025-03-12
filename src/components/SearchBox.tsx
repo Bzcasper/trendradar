@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Loader2, Search, Sparkles } from "lucide-react";
@@ -12,10 +12,14 @@ interface SearchBoxProps {
 export const SearchBox = ({ onSearch, isLoading }: SearchBoxProps) => {
   const [query, setQuery] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     onSearch(query);
-  };
+  }, [query, onSearch]);
+
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setQuery(e.target.value);
+  }, []);
 
   return (
     <form onSubmit={handleSubmit} className="flex gap-2 max-w-2xl w-full">
@@ -27,8 +31,8 @@ export const SearchBox = ({ onSearch, isLoading }: SearchBoxProps) => {
           type="text"
           placeholder="Search for trends across platforms..."
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className="pl-10 pr-4 py-6 transition-all text-base"
+          onChange={handleChange}
+          className="pl-10 pr-4 py-6 transition-colors text-base"
           disabled={isLoading}
         />
       </div>
