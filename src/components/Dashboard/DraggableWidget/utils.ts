@@ -39,7 +39,7 @@ export const getWidgetIcon = (type: WidgetType): JSX.Element => {
     case "trendRadar":
       return <TrendRadarIcon />;
     case "trendPerformance":
-      return <TrafficTrendsIcon />; // Using TrafficTrends as fallback
+      return <TrafficTrendsIcon />;
     default:
       return <div className="w-8 h-8 bg-gray-200 rounded-full" />;
   }
