@@ -11,7 +11,8 @@ import {
   EngagementRadarIcon,
   KeywordCloudIcon,
   ViralPotentialIcon,
-  TrendRadarIcon
+  TrendRadarIcon,
+  TrendHeatmapIcon
 } from "../WidgetIcons";
 
 export const getWidgetIcon = (type: WidgetType) => {
