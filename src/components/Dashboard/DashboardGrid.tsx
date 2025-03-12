@@ -54,8 +54,8 @@ export function DashboardGrid({ widgets, onWidgetsChange, onRemoveWidget, onOpen
       collisionDetection={closestCenter} 
       onDragEnd={handleDragEnd}
     >
-      <div style={{ gap: spacing }} className="space-y-0">
-        <div className="flex justify-end mb-6">
+      <div className="space-y-[1.618rem]">
+        <div className="flex justify-end">
           <Button 
             size="sm" 
             variant="outline" 
@@ -70,7 +70,7 @@ export function DashboardGrid({ widgets, onWidgetsChange, onRemoveWidget, onOpen
         <SortableContext items={widgets.map(widget => widget.id)} strategy={verticalListSortingStrategy}>
           <div className="grid grid-cols-1 gap-[1.618rem]">
             {/* Full-width widgets with resizing */}
-            <div style={{ gap: spacing }} className="space-y-[1.618rem]">
+            <div className="space-y-[1.618rem]">
               {widgets
                 .filter(widget => widget.size === "full")
                 .map((widget) => (

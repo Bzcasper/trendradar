@@ -65,32 +65,32 @@ export default function Dashboard() {
   };
   
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-gray-50 relative">
+    <div className="min-h-screen dashboard-bg relative">
       {activeTab === "customizable" && (
         <WidgetSidebar onAddWidget={handleAddWidget} />
       )}
       
-      <div className={`container mx-auto py-8 space-y-8 transition-all ${activeTab === "customizable" ? "ml-12" : "ml-0"}`}>
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+      <div className={`container mx-auto py-8 px-4 sm:px-6 transition-all ${activeTab === "customizable" ? "ml-12" : "ml-0"}`}>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-[1.618rem] gap-4">
           <h1 className="text-2xl font-bold text-brand-primary">Dashboard</h1>
           
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="bg-white rounded-lg shadow-sm">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="glass-morphism rounded-[0.618rem]">
             <TabsList className="p-1">
               <TabsTrigger 
                 value="customizable" 
-                className="data-[state=active]:bg-brand-primary data-[state=active]:text-white"
+                className="data-[state=active]:bg-brand-primary data-[state=active]:text-white rounded-[0.382rem]"
               >
                 Customizable
               </TabsTrigger>
               <TabsTrigger 
                 value="standard" 
-                className="data-[state=active]:bg-brand-primary data-[state=active]:text-white"
+                className="data-[state=active]:bg-brand-primary data-[state=active]:text-white rounded-[0.382rem]"
               >
                 Standard
               </TabsTrigger>
               <TabsTrigger 
                 value="platforms" 
-                className="data-[state=active]:bg-brand-primary data-[state=active]:text-white"
+                className="data-[state=active]:bg-brand-primary data-[state=active]:text-white rounded-[0.382rem]"
               >
                 Platform Analytics
               </TabsTrigger>
@@ -118,7 +118,7 @@ export default function Dashboard() {
             onPlatformChange={setCurrentPlatform}
           />
         ) : (
-          <div className="grid grid-cols-1 gap-8">
+          <div className="grid grid-cols-1 gap-[1.618rem]">
             <AnalyticsDashboard />
             <YouTubeAnalytics />
           </div>

@@ -42,9 +42,9 @@
   color: #888;
 }
 
-/* New styles for trend dashboard */
+/* Dashboard styles */
 .glass-morphism {
-  @apply backdrop-blur-lg bg-white/10 border border-white/20 shadow-lg;
+  @apply backdrop-blur-lg bg-white/90 border border-gray-200 shadow-lg;
 }
 
 .text-gradient-primary {
@@ -52,7 +52,7 @@
 }
 
 .trend-card {
-  @apply bg-gradient-to-br from-card to-background/80 backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-200;
+  @apply bg-white shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100;
 }
 
 .fade-in {
@@ -96,7 +96,7 @@
 
 /* Resizable widget styles */
 .resizable-handle {
-  @apply absolute z-20 bg-brand-primary/50 hover:bg-brand-primary/80 transition-colors duration-200;
+  @apply absolute z-20 bg-brand-primary/20 hover:bg-brand-primary/40 transition-colors duration-200;
 }
 
 .resizable-handle-ne {
@@ -123,6 +123,19 @@
 
 .slide-up-header-container:hover .slide-up-header {
   transform: translateY(0);
+}
+
+/* Professional dashboard styles */
+.dashboard-bg {
+  @apply bg-gradient-to-b from-gray-50 to-gray-100;
+}
+
+.widget-card {
+  @apply bg-white rounded-[0.618rem] shadow-sm hover:shadow-md transition-all duration-300;
+}
+
+.widget-header {
+  @apply bg-gradient-to-r from-brand-primary/95 to-brand-primary/85 text-white;
 }
 
 /* Scrollbar styling */

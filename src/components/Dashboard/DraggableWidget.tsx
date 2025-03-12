@@ -28,13 +28,13 @@ export function DraggableWidget({ id, title, onRemove, children }: DraggableWidg
     <Card 
       ref={setNodeRef} 
       style={style} 
-      className="relative overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 rounded-[0.618rem]" 
+      className="relative overflow-hidden widget-card" 
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Header that slides up/down on hover */}
       <div 
-        className="bg-gradient-to-r from-brand-primary/90 to-brand-primary/80 text-white absolute inset-x-0 top-0 z-10 flex items-center justify-between px-3 transition-transform duration-300 ease-in-out"
+        className="widget-header absolute inset-x-0 top-0 z-10 flex items-center justify-between px-3 transition-transform duration-300 ease-in-out"
         style={{ 
           height: headerHeight,
           transform: isHovered ? 'translateY(0)' : 'translateY(-100%)'
@@ -61,7 +61,7 @@ export function DraggableWidget({ id, title, onRemove, children }: DraggableWidg
         )}
       </div>
       
-      {/* Content stays in place */}
+      {/* Content */}
       <div className="p-4">
         {children}
       </div>

@@ -16,12 +16,12 @@ export const DashboardCard = ({ title, children, className }: DashboardCardProps
   
   return (
     <Card 
-      className={`fade-in relative overflow-hidden ${className || ""}`}
+      className={`fade-in relative overflow-hidden widget-card ${className || ""}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <div 
-        className="bg-gradient-to-r from-brand-primary/90 to-brand-primary/80 text-white absolute inset-x-0 top-0 z-10 flex items-center px-4 transition-transform duration-300 ease-in-out"
+        className="widget-header absolute inset-x-0 top-0 z-10 flex items-center px-4 transition-transform duration-300 ease-in-out"
         style={{ 
           height: headerHeight,
           transform: isHovered ? 'translateY(0)' : 'translateY(-100%)'
