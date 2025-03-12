@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, DragStartEvent, DragOverEvent } from "@dnd-kit/core";
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { YouTubeAnalytics } from "@/components/YouTubeAnalytics";
 import { AnalyticsDashboard } from "@/components/Dashboard/AnalyticsDashboard";
@@ -19,6 +19,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { nanoid } from "nanoid";
+import { PlatformInsights } from "@/components/YouTubeAnalytics/PlatformInsights";
+import mockTrendData from "@/data/mockTrendData";
 
 export default function Dashboard() {
   const [dashboardWidgets, setDashboardWidgets] = useState<WidgetData[]>([
@@ -30,8 +32,7 @@ export default function Dashboard() {
   
   const [activeTab, setActiveTab] = useState<string>("customizable");
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [isDraggingFromSidebar, setIsDraggingFromSidebar] = useState(false);
-  const [draggedWidgetType, setDraggedWidgetType] = useState<WidgetType | null>(null);
+  const [currentPlatform, setCurrentPlatform] = useState<string>("all");
   
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -78,9 +79,6 @@ export default function Dashboard() {
         return arrayMove(items, oldIndex, newIndex);
       });
     }
-    
-    setIsDraggingFromSidebar(false);
-    setDraggedWidgetType(null);
   };
   
   const handleAddWidget = (type: WidgetType) => {
@@ -117,6 +115,7 @@ export default function Dashboard() {
             <TabsList>
               <TabsTrigger value="customizable">Customizable</TabsTrigger>
               <TabsTrigger value="standard">Standard</TabsTrigger>
+              <TabsTrigger value="platforms">Platform Analytics</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
@@ -194,6 +193,34 @@ export default function Dashboard() {
               </SortableContext>
             </div>
           </DndContext>
+        ) : activeTab === "platforms" ? (
+          <div className="space-y-8">
+            <Tabs 
+              value={currentPlatform} 
+              onValueChange={setCurrentPlatform}
+              className="w-full"
+            >
+              <TabsList className="w-full justify-start mb-6 bg-muted/50">
+                <TabsTrigger value="all">All Platforms</TabsTrigger>
+                <TabsTrigger value="youtube">YouTube</TabsTrigger>
+                <TabsTrigger value="twitter">Twitter</TabsTrigger>
+                <TabsTrigger value="tiktok">TikTok</TabsTrigger>
+                <TabsTrigger value="reddit">Reddit</TabsTrigger>
+                <TabsTrigger value="newsapi">News</TabsTrigger>
+                <TabsTrigger value="wikipedia">Wikipedia</TabsTrigger>
+              </TabsList>
+            </Tabs>
+            
+            <PlatformInsights 
+              data={mockTrendData.map(item => ({
+                ...item,
+                platform: item.category || "YouTube"
+              }))} 
+              platform={currentPlatform} 
+            />
+            
+            <YouTubeAnalytics />
+          </div>
         ) : (
           <div className="grid grid-cols-1 gap-8">
             <AnalyticsDashboard />

@@ -2,9 +2,8 @@
 import { useState } from "react";
 import { useToast } from "../ui/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { fetchMultiPlatformTrends } from "@/utils/apiService";
+import { fetchMultiPlatformTrends, TrendingItem } from "@/utils/multiPlatformApiService";
 import mockTrendData from "@/data/mockTrendData";
-import { calculateTrendingScore } from "@/utils/trendingAlgorithm";
 import { ShieldAlert } from "lucide-react";
 import { SearchBox } from "../SearchBox";
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
@@ -15,7 +14,7 @@ import { AnalyticsCharts } from "./AnalyticsCharts";
 import { KeywordAnalysisChart } from "./KeywordAnalysisChart";
 
 export const YouTubeAnalytics = () => {
-  const [searchResults, setSearchResults] = useState(mockTrendData);
+  const [searchResults, setSearchResults] = useState<TrendingItem[]>(mockTrendData);
   const [isLoading, setIsLoading] = useState(false);
   const [platform, setPlatform] = useState("all");
   const [timeframe, setTimeframe] = useState("week");
@@ -34,58 +33,18 @@ export const YouTubeAnalytics = () => {
 
     setIsLoading(true);
     try {
-      // In a real app, we would call our multi-platform API service
-      // For now, we'll simulate this with mock data and our algorithm
-      let results;
+      // Call our multi-platform API service
+      const results = await fetchMultiPlatformTrends(
+        query, 
+        platform === 'all' ? ['all'] : [platform],
+        timeframe
+      );
       
-      if (query.trim() === "") {
-        results = mockTrendData;
-      } else {
-        // Try to fetch from public APIs if possible, otherwise filter mock data
-        try {
-          results = await fetchMultiPlatformTrends(query, platform, timeframe);
-        } catch (apiError) {
-          console.log("API fetch failed, using filtered mock data", apiError);
-          
-          // Filter mock data as fallback
-          results = mockTrendData.filter(item => 
-            item.title.toLowerCase().includes(query.toLowerCase()) ||
-            item.description.toLowerCase().includes(query.toLowerCase())
-          );
-        }
-      }
-      
-      // Apply our trending algorithm to each result
-      const processedResults = results.map(item => {
-        // Calculate scores based on our algorithm
-        const trendingMetrics = calculateTrendingScore(
-          item.views,
-          item.likes,
-          item.comments,
-          new Date(item.published_at),
-          item.engagement_rate || 0
-        );
-        
-        return {
-          ...item,
-          view_velocity: trendingMetrics.viewVelocity,
-          engagement_rate: trendingMetrics.engagementRate,
-          trending_score: trendingMetrics.trendingScore,
-          viral_probability: trendingMetrics.viralProbability,
-          trend_acceleration: trendingMetrics.trendAcceleration,
-          rsi: trendingMetrics.rsi,
-          relative_volume: trendingMetrics.relativeVolume
-        };
-      });
-      
-      // Sort by trending score descending
-      processedResults.sort((a, b) => (b.trending_score || 0) - (a.trending_score || 0));
-      
-      setSearchResults(processedResults);
+      setSearchResults(results);
       
       toast({
         title: "Analysis Complete",
-        description: `Found and analyzed ${processedResults.length} results for "${query}"`,
+        description: `Found and analyzed ${results.length} results for "${query || 'trending content'}"`,
       });
     } catch (error) {
       console.error('Search failed:', error);
@@ -112,14 +71,15 @@ export const YouTubeAnalytics = () => {
   const prepareChartData = () => {
     // Prepare data for pie chart
     const categoryData = searchResults.reduce((acc, video) => {
-      const existingCategory = acc.find(item => item.name === video.category);
+      const platform = video.platform || video.category || 'Unknown';
+      const existingCategory = acc.find(item => item.name === platform);
       if (existingCategory) {
         existingCategory.value += 1;
       } else {
-        acc.push({ name: video.category || 'Uncategorized', value: 1 });
+        acc.push({ name: platform, value: 1 });
       }
       return acc;
-    }, []);
+    }, [] as { name: string, value: number }[]);
 
     // Prepare data for charts
     const viewsData = searchResults.map(video => ({
@@ -150,7 +110,7 @@ export const YouTubeAnalytics = () => {
         });
       }
       return acc;
-    }, []).sort((a, b) => b.count - a.count).slice(0, 12);
+    }, [] as { keyword: string, count: number }[]).sort((a, b) => b.count - a.count).slice(0, 12);
 
     return {
       categoryData,
@@ -172,7 +132,7 @@ export const YouTubeAnalytics = () => {
             </div>
             <div className="ml-3">
               <p className="text-sm text-primary">
-                Please sign in to access the full features of TrendRadar.
+                Please sign in to access the full features of TrendRadar.ai.
               </p>
             </div>
           </div>
@@ -194,8 +154,10 @@ export const YouTubeAnalytics = () => {
             <TabsList className="w-full md:w-auto">
               <TabsTrigger value="all">All</TabsTrigger>
               <TabsTrigger value="youtube">YouTube</TabsTrigger>
-              <TabsTrigger value="reddit">Reddit</TabsTrigger>
+              <TabsTrigger value="twitter">Twitter</TabsTrigger>
               <TabsTrigger value="tiktok">TikTok</TabsTrigger>
+              <TabsTrigger value="reddit">Reddit</TabsTrigger>
+              <TabsTrigger value="news">News</TabsTrigger>
             </TabsList>
           </Tabs>
           
