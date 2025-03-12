@@ -1,48 +1,63 @@
-
-import React from "react";
-import { GripVertical } from "lucide-react";
-import { WidgetControls } from "./WidgetControls";
+import { DraggableAttributes } from "@dnd-kit/core";
+import { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities";
+import { ChevronDown, ChevronUp, Grip, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface WidgetHeaderProps {
   id: string;
   title: string;
+  isDragging?: boolean;
   isExpanded: boolean;
+  attributes?: DraggableAttributes;
+  listeners?: SyntheticListenerMap;
   onToggleExpand: () => void;
-  onRemove?: () => void;
-  // Use Record<string, any> to allow any attributes from dnd-kit
-  attributes: Record<string, any>;
-  listeners: Record<string, any>;
+  onRemove: () => void;
 }
 
-export const WidgetHeader: React.FC<WidgetHeaderProps> = ({
+export function WidgetHeader({
   id,
   title,
+  isDragging,
   isExpanded,
-  onToggleExpand,
-  onRemove,
   attributes,
   listeners,
-}) => {
+  onToggleExpand,
+  onRemove
+}: WidgetHeaderProps) {
   return (
-    <div className="flex items-center justify-between w-full">
-      <div className="flex items-center">
-        <div 
-          className="cursor-grab p-1 mr-2 text-white hover:text-white touch-none" 
-          {...attributes} 
-          {...listeners}
-          aria-label={`Drag ${title}`}
-        >
-          <GripVertical size={16} aria-hidden="true" />
-        </div>
-        <h3 id={`widget-title-${id}`} className="font-medium text-sm">{title}</h3>
+    <div 
+      className={`widget-header flex items-center justify-between p-3 bg-white border-b ${
+        isDragging ? 'cursor-grabbing' : 'cursor-grab'
+      }`}
+      {...attributes}
+      {...listeners}
+    >
+      <div className="flex items-center gap-2">
+        <Grip className="h-4 w-4 text-gray-400" />
+        <h3 className="font-medium text-sm">{title}</h3>
       </div>
-      
-      {/* Make sure to use onToggleExpand prop here, not onToggleExpanded */}
-      <WidgetControls
-        isExpanded={isExpanded}
-        onToggleExpand={onToggleExpand}
-        onRemove={onRemove}
-      />
+      <div className="flex items-center gap-1">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 w-8 p-0"
+          onClick={onToggleExpand}
+        >
+          {isExpanded ? (
+            <ChevronUp className="h-4 w-4" />
+          ) : (
+            <ChevronDown className="h-4 w-4" />
+          )}
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 w-8 p-0 hover:text-red-500"
+          onClick={onRemove}
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
-};
+}

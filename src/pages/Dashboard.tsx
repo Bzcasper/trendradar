@@ -1,15 +1,15 @@
-
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DashboardTabs } from "@/components/Dashboard/Navigation/DashboardTabs";
+import { DashboardHeader } from "@/components/Dashboard/Navigation/DashboardHeader";
+import { NavbarContainer } from "@/components/Dashboard/Layout/NavbarContainer";
 import { YouTubeAnalytics } from "@/components/YouTubeAnalytics";
 import { AnalyticsDashboard } from "@/components/Dashboard/AnalyticsDashboard";
 import { DashboardGrid } from "@/components/Dashboard/DashboardGrid";
 import { PlatformAnalytics } from "@/components/Dashboard/PlatformAnalytics";
 import { AddWidgetDialog } from "@/components/Dashboard/AddWidgetDialog";
 import { WidgetSidebar } from "@/components/Dashboard/WidgetSidebar";
-import { WidgetData, WidgetType, availableWidgets } from "@/components/Dashboard/types";
+import { WidgetData, WidgetType } from "@/components/Dashboard/types";
 import { nanoid } from "nanoid";
-import { Navbar } from "@/components/Layout/Navbar";
 
 export default function Dashboard() {
   const [dashboardWidgets, setDashboardWidgets] = useState<WidgetData[]>([
@@ -28,25 +28,20 @@ export default function Dashboard() {
   const lastScrollY = useRef(0);
   const scrollTimer = useRef<number | null>(null);
   
-  // Handle scroll events to show/hide navbar with throttling
   const handleScroll = useCallback(() => {
     const currentScrollY = window.scrollY;
     
     if (currentScrollY < 10) {
-      // Always show navbar at the top of the page
       setShowNavbar(true);
     } else if (currentScrollY < lastScrollY.current) {
-      // Show navbar when scrolling up
       setShowNavbar(true);
     } else if (currentScrollY > lastScrollY.current) {
-      // Hide navbar when scrolling down
       setShowNavbar(false);
     }
     
     lastScrollY.current = currentScrollY;
   }, []);
   
-  // Optimized scroll handler with throttling
   useEffect(() => {
     const throttledScrollHandler = () => {
       if (scrollTimer.current === null) {
@@ -65,7 +60,6 @@ export default function Dashboard() {
     };
   }, [handleScroll]);
   
-  // Handle drag and drop for widgets
   useEffect(() => {
     const handleDragOver = (e: DragEvent) => {
       e.preventDefault();
@@ -90,7 +84,6 @@ export default function Dashboard() {
     };
   }, [activeTab]);
   
-  // Handle adding new widgets
   const handleAddWidget = useCallback((type: WidgetType) => {
     const widget = availableWidgets.find(w => w.type === type);
     if (widget) {
@@ -107,25 +100,9 @@ export default function Dashboard() {
     }
   }, []);
   
-  // Handle tab change
-  const handleTabChange = useCallback((value: string) => {
-    setActiveTab(value);
-  }, []);
-  
   return (
     <div className="min-h-screen dashboard-bg relative overflow-x-hidden pb-20">
-      {/* Custom Navbar Section */}
-      <div 
-        className="fixed top-0 left-0 right-0 z-50 navbar-fade"
-        style={{
-          opacity: showNavbar ? 1 : 0,
-          transform: showNavbar ? 'translateY(0)' : 'translateY(-100%)',
-          pointerEvents: showNavbar ? 'auto' : 'none'
-        }}
-        aria-hidden={!showNavbar}
-      >
-        <Navbar />
-      </div>
+      <NavbarContainer showNavbar={showNavbar} />
       
       {activeTab === "customizable" && (
         <WidgetSidebar onAddWidget={handleAddWidget} />
@@ -137,30 +114,8 @@ export default function Dashboard() {
         aria-label="Dashboard content"
       >
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-          <h1 className="text-2xl font-bold text-brand-primary">Dashboard</h1>
-          
-          <Tabs value={activeTab} onValueChange={handleTabChange} className="glass-morphism rounded-md">
-            <TabsList className="p-1">
-              <TabsTrigger 
-                value="customizable" 
-                className="data-[state=active]:bg-brand-primary data-[state=active]:text-white rounded-sm"
-              >
-                Customizable
-              </TabsTrigger>
-              <TabsTrigger 
-                value="standard" 
-                className="data-[state=active]:bg-brand-primary data-[state=active]:text-white rounded-sm"
-              >
-                Standard
-              </TabsTrigger>
-              <TabsTrigger 
-                value="platforms" 
-                className="data-[state=active]:bg-brand-primary data-[state=active]:text-white rounded-sm"
-              >
-                Platform Analytics
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <DashboardHeader title="Dashboard" />
+          <DashboardTabs activeTab={activeTab} onTabChange={setActiveTab} />
         </div>
 
         {activeTab === "customizable" ? (
