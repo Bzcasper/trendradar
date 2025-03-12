@@ -1,3 +1,4 @@
+
 import js from "@eslint/js";
 import globals from "globals";
 import reactHooks from "eslint-plugin-react-hooks";
@@ -21,9 +22,11 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       "react-refresh/only-export-components": [
         "warn",
-        { allowConstantExport: true },
+        { allowConstantExport: true, allowExportNames: ['badgeVariants', 'buttonVariants'] },
       ],
       "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-empty-interface": ["error", { "allowSingleExtends": true }],
+      "@typescript-eslint/no-empty-object-type": "off",
     },
   }
 );

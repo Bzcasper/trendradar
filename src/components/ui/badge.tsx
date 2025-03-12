@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 
@@ -33,4 +34,8 @@ function Badge({ className, variant, ...props }: BadgeProps) {
   )
 }
 
-export { Badge, badgeVariants }
+// Export the component separately from the variants
+export { Badge }
+
+// Export the variants in a separate named export
+export { badgeVariants }

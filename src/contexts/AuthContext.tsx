@@ -5,13 +5,19 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { useNavigate } from 'react-router-dom';
 
+interface UserMetadata {
+  name?: string;
+  avatar_url?: string;
+  [key: string]: string | undefined;
+}
+
 interface AuthContextType {
   session: Session | null;
   user: User | null;
   loading: boolean;
   signInWithGoogle: () => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<void>;
-  signUpWithEmail: (email: string, password: string, metadata?: any) => Promise<void>;
+  signUpWithEmail: (email: string, password: string, metadata?: UserMetadata) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
 }
@@ -92,7 +98,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signUpWithEmail = async (email: string, password: string, metadata?: any) => {
+  const signUpWithEmail = async (email: string, password: string, metadata?: UserMetadata) => {
     try {
       console.log('Starting email sign up...');
       const { error } = await supabase.auth.signUp({

@@ -34,25 +34,6 @@ export function ResizableWidget({
   const startPos = useRef({ x: 0, y: 0 });
   const startSize = useRef({ width: 0, height: 0 });
   
-  // Handle resize start
-  const handleResizeStart = useCallback((e: React.MouseEvent<HTMLDivElement>, direction: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsResizing(true);
-    setResizeDirection(direction);
-    startPos.current = { x: e.clientX, y: e.clientY };
-    
-    if (widgetRef.current) {
-      startSize.current = {
-        width: widgetRef.current.offsetWidth,
-        height: widgetRef.current.offsetHeight
-      };
-    }
-    
-    document.addEventListener('mousemove', handleResize);
-    document.addEventListener('mouseup', handleResizeEnd);
-  }, []);
-  
   // Handle resize
   const handleResize = useCallback((e: MouseEvent) => {
     if (!isResizing || !resizeDirection) return;
@@ -94,6 +75,25 @@ export function ResizableWidget({
     document.removeEventListener('mousemove', handleResize);
     document.removeEventListener('mouseup', handleResizeEnd);
   }, [handleResize]);
+  
+  // Handle resize start - Fix dependency array to include handleResize and handleResizeEnd
+  const handleResizeStart = useCallback((e: React.MouseEvent<HTMLDivElement>, direction: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsResizing(true);
+    setResizeDirection(direction);
+    startPos.current = { x: e.clientX, y: e.clientY };
+    
+    if (widgetRef.current) {
+      startSize.current = {
+        width: widgetRef.current.offsetWidth,
+        height: widgetRef.current.offsetHeight
+      };
+    }
+    
+    document.addEventListener('mousemove', handleResize);
+    document.addEventListener('mouseup', handleResizeEnd);
+  }, [handleResize, handleResizeEnd]);
   
   // Clean up event listeners
   useEffect(() => {
