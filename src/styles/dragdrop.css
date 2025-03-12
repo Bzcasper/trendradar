@@ -1,0 +1,27 @@
+
+/* Drag enhancements - performance optimized */
+[data-dragging="true"] {
+  cursor: grabbing !important;
+  user-select: none;
+  z-index: 999 !important;
+  opacity: 0.8;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  will-change: transform, opacity;
+}
+
+/* Improved grabbing styles */
+.cursor-grab {
+  cursor: grab;
+}
+
+.cursor-grab:active {
+  cursor: grabbing;
+}
+
+/* Improved dragging visual feedback - performance optimized */
+.dragging-component {
+  @apply shadow-depth-3;
+  transform: scale(1.01);
+  z-index: 100;
+  will-change: transform;
+}

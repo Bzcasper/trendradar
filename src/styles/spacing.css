@@ -1,0 +1,14 @@
+
+/* Fibonacci sequence for spacing */
+.fib-space-xs { margin: 0.618rem; padding: 0.618rem; }
+.fib-space-sm { margin: 1rem; padding: 1rem; }
+.fib-space-md { margin: 1.618rem; padding: 1.618rem; }
+.fib-space-lg { margin: 2.618rem; padding: 2.618rem; }
+.fib-space-xl { margin: 4.236rem; padding: 4.236rem; }
+
+/* Golden ratio border radius */
+.fib-rounded-sm { border-radius: 0.382rem; }
+.fib-rounded { border-radius: 0.618rem; }
+.fib-rounded-md { border-radius: 1rem; }
+.fib-rounded-lg { border-radius: 1.618rem; }
+.fib-rounded-xl { border-radius: 2.618rem; }

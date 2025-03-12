@@ -1,0 +1,25 @@
+
+/* Animations and transitions */
+.gradient-bg {
+  @apply bg-gradient-to-br from-brand-primary via-brand-primary/95 to-brand-primary/90;
+}
+
+.feature-card {
+  @apply bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300;
+}
+
+/* Golden ratio based transformations */
+.hover-scale {
+  transition: transform 0.2s ease-out;
+  will-change: transform;
+}
+
+.hover-scale:hover {
+  transform: scale(1.03);
+}
+
+/* Navbar animation - optimized for performance */
+.navbar-fade {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  will-change: opacity, transform;
+}

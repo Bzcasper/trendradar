@@ -5,7 +5,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { YouTubeAuthProvider } from "@/contexts/YouTubeAuthContext";
 import { TaskProvider } from "@/contexts/TaskContext";
 import App from './App.tsx'
-import './index.css'
+import './styles/index.css'
 
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>

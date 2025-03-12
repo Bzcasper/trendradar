@@ -1,0 +1,22 @@
+
+/* Resizable widget styles - optimized */
+.resizable-handle {
+  @apply absolute z-20 bg-brand-primary/50 hover:bg-brand-primary/80 transition-colors;
+  will-change: background-color;
+}
+
+.resizable-handle-ne {
+  @apply top-0 right-0 cursor-ne-resize rounded-tr-sm;
+}
+
+.resizable-handle-se {
+  @apply bottom-0 right-0 cursor-se-resize rounded-br-sm;
+}
+
+.resizable-handle-sw {
+  @apply bottom-0 left-0 cursor-sw-resize rounded-bl-sm;
+}
+
+.resizable-handle-nw {
+  @apply top-0 left-0 cursor-nw-resize rounded-tl-sm;
+}
