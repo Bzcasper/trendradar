@@ -8,17 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { availableWidgets, WidgetType } from "./types";
-import {
-  TrafficTrendsIcon,
-  TrafficSourcesIcon,
-  ConversionFunnelIcon,
-  PlatformPerformanceIcon,
-  KeyMetricsIcon,
-  TopPerformersIcon,
-  EngagementRadarIcon,
-  KeywordCloudIcon,
-  ViralPotentialIcon
-} from "./WidgetIcons";
+import { getWidgetIcon } from "./Sidebar/WidgetIcon";
 
 interface AddWidgetDialogProps {
   open: boolean;
@@ -27,21 +17,6 @@ interface AddWidgetDialogProps {
 }
 
 export function AddWidgetDialog({ open, onOpenChange, onAddWidget }: AddWidgetDialogProps) {
-  const getWidgetIcon = (type: WidgetType) => {
-    switch (type) {
-      case "trafficTrends": return <TrafficTrendsIcon />;
-      case "trafficSources": return <TrafficSourcesIcon />;
-      case "conversionFunnel": return <ConversionFunnelIcon />;
-      case "platformPerformance": return <PlatformPerformanceIcon />;
-      case "keyMetrics": return <KeyMetricsIcon />;
-      case "topPerformers": return <TopPerformersIcon />;
-      case "engagementRadar": return <EngagementRadarIcon />;
-      case "keywordCloud": return <KeywordCloudIcon />;
-      case "viralPotential": return <ViralPotentialIcon />;
-      default: return null;
-    }
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
