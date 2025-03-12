@@ -1,6 +1,7 @@
 
 import mockTrendData from "@/data/mockTrendData";
 import { calculateTrendingScore } from "./trendingAlgorithm";
+import { TrendingItem } from "./api/types";
 
 /**
  * Fetch trends from multiple platforms
@@ -10,10 +11,10 @@ export async function fetchMultiPlatformTrends(
   query: string, 
   platform: string = 'all',
   timeframe: string = 'week'
-) {
+): Promise<TrendingItem[]> {
   try {
     // Start with our mock data as fallback
-    let results = [...mockTrendData];
+    let results: TrendingItem[] = [...mockTrendData];
     
     if (platform === 'all' || platform === 'reddit') {
       try {
@@ -37,7 +38,7 @@ export async function fetchMultiPlatformTrends(
     if (query) {
       results = results.filter(item => 
         item.title.toLowerCase().includes(query.toLowerCase()) ||
-        item.description.toLowerCase().includes(query.toLowerCase())
+        (item.description && item.description.toLowerCase().includes(query.toLowerCase()))
       );
     }
     
@@ -47,7 +48,7 @@ export async function fetchMultiPlatformTrends(
     // Fall back to filtered mock data
     return mockTrendData.filter(item => 
       item.title.toLowerCase().includes(query.toLowerCase()) ||
-      item.description.toLowerCase().includes(query.toLowerCase())
+      (item.description && item.description.toLowerCase().includes(query.toLowerCase()))
     );
   }
 }
@@ -55,7 +56,7 @@ export async function fetchMultiPlatformTrends(
 /**
  * Fetch trends from Reddit public API
  */
-async function fetchRedditTrends(query: string) {
+async function fetchRedditTrends(query: string): Promise<TrendingItem[]> {
   try {
     // Use public Reddit API - new subreddits
     const response = await fetch('https://www.reddit.com/subreddits/new/.json?limit=10');
@@ -98,6 +99,7 @@ async function fetchRedditTrends(query: string) {
         likes: likes,
         comments: comments,
         category: 'Reddit',
+        platform: 'Reddit', // Adding the required platform property
         thumbnail_url: subredditData.icon_img || 'https://i.imgur.com/sdO8tAw.png',
         published_at: new Date(subredditData.created_utc * 1000).toISOString(),
         description: subredditData.public_description || 'No description available',
@@ -119,7 +121,7 @@ async function fetchRedditTrends(query: string) {
  * Note: This is for demonstration purposes. In a real application,
  * we would need to use official APIs with authentication.
  */
-async function fetchTikTokTrends(query: string) {
+async function fetchTikTokTrends(query: string): Promise<TrendingItem[]> {
   try {
     // For demonstration, we'll create synthetic TikTok data
     // In a real app, this would call the TikTok API
@@ -135,7 +137,7 @@ async function fetchTikTokTrends(query: string) {
 /**
  * Generate synthetic TikTok data for demonstration
  */
-function generateSyntheticTikTokData(query: string) {
+function generateSyntheticTikTokData(query: string): TrendingItem[] {
   const tiktokTitles = [
     "How to perfect that trending dance move #dance #viral",
     "What I eat in a day as a fitness model #fitness #nutrition",
@@ -172,6 +174,7 @@ function generateSyntheticTikTokData(query: string) {
         likes,
         comments,
         category: 'TikTok',
+        platform: 'TikTok', // Adding the required platform property
         thumbnail_url: `https://picsum.photos/seed/tiktok${index}/300/300`,
         published_at: createdDate.toISOString(),
         description: `Trending TikTok video about ${title.split('#')[0].trim()}`,
