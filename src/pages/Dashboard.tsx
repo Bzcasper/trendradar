@@ -9,6 +9,7 @@ import { PlatformAnalytics } from "@/components/Dashboard/PlatformAnalytics";
 import { AddWidgetDialog } from "@/components/Dashboard/AddWidgetDialog";
 import { WidgetSidebar } from "@/components/Dashboard/WidgetSidebar";
 import { WidgetData, WidgetType } from "@/components/Dashboard/types";
+import { availableWidgets } from "@/components/Dashboard/utils/availableWidgets";
 import { nanoid } from "nanoid";
 
 export default function Dashboard() {
