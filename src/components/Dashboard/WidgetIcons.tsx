@@ -260,3 +260,52 @@ export const TrendHeatmapIcon = () => (
   </svg>
 );
 
+// Trend Radar Widget Icon
+export const TrendRadarIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" className="w-full h-full">
+    <rect x="0" y="0" width="200" height="200" rx="10" fill="#0f172a" stroke="#4338ca" strokeWidth="2"/>
+    
+    {/* Radar Rings */}
+    <circle cx="100" cy="100" r="20" fill="none" stroke="#ffffff" strokeWidth="1" opacity="0.1" />
+    <circle cx="100" cy="100" r="40" fill="none" stroke="#ffffff" strokeWidth="1" opacity="0.1" />
+    <circle cx="100" cy="100" r="60" fill="none" stroke="#ffffff" strokeWidth="1" opacity="0.1" />
+    <circle cx="100" cy="100" r="80" fill="none" stroke="#ffffff" strokeWidth="1" opacity="0.1" />
+    
+    {/* Axis Lines */}
+    <line x1="100" y1="0" x2="100" y2="200" stroke="#ffffff" strokeWidth="1" opacity="0.1" />
+    <line x1="0" y1="100" x2="200" y2="100" stroke="#ffffff" strokeWidth="1" opacity="0.1" />
+    <line x1="30" y1="30" x2="170" y2="170" stroke="#ffffff" strokeWidth="1" opacity="0.1" />
+    <line x1="170" y1="30" x2="30" y2="170" stroke="#ffffff" strokeWidth="1" opacity="0.1" />
+    
+    {/* Current Metrics Polygon */}
+    <polygon 
+      points="100,40 135,70 120,120 80,130 50,80 70,50" 
+      fill="url(#currentIconGradient)" 
+      stroke="#4338ca" 
+      strokeWidth="2" />
+      
+    {/* Target Metrics Polygon */}
+    <polygon 
+      points="100,20 155,55 155,145 100,180 45,145 45,55" 
+      fill="none" 
+      stroke="#0ea5e9" 
+      strokeWidth="1.5" 
+      strokeDasharray="3" 
+      opacity="0.7" />
+      
+    {/* Key Data Points */}
+    <circle cx="100" cy="40" r="4" fill="#4338ca" />
+    <circle cx="135" cy="70" r="4" fill="#4338ca" />
+    <circle cx="120" cy="120" r="4" fill="#4338ca" />
+    <circle cx="80" cy="130" r="4" fill="#4338ca" />
+    <circle cx="50" cy="80" r="4" fill="#4338ca" />
+    <circle cx="70" cy="50" r="4" fill="#4338ca" />
+    
+    <defs>
+      <linearGradient id="currentIconGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stopColor="#4338ca" stopOpacity="0.7" />
+        <stop offset="100%" stopColor="#4338ca" stopOpacity="0.1" />
+      </linearGradient>
+    </defs>
+  </svg>
+);

@@ -10,7 +10,8 @@ import {
   TopPerformersIcon,
   EngagementRadarIcon,
   KeywordCloudIcon,
-  ViralPotentialIcon
+  ViralPotentialIcon,
+  TrendRadarIcon
 } from "../WidgetIcons";
 
 export const getWidgetIcon = (type: WidgetType) => {
@@ -25,6 +26,8 @@ export const getWidgetIcon = (type: WidgetType) => {
     case "keywordCloud": return <div className="w-6 h-6"><KeywordCloudIcon /></div>;
     case "viralPotential": return <div className="w-6 h-6"><ViralPotentialIcon /></div>;
     case "trendPerformance": return <div className="w-6 h-6"><TrafficTrendsIcon /></div>; // Using TrafficTrendsIcon as a fallback
+    case "trendHeatmap": return <div className="w-6 h-6"><TrendHeatmapIcon /></div>;
+    case "trendRadar": return <div className="w-6 h-6"><TrendRadarIcon /></div>;
     default: return <Plus size={16} className="text-gray-400" />;
   }
 };

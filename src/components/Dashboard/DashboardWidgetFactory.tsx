@@ -12,6 +12,7 @@ import { KeywordCloudWidget } from "./Widgets/KeywordCloudWidget";
 import { ViralPotentialWidget } from "./Widgets/ViralPotentialWidget";
 import { TrendPerformanceWidget } from './Widgets/TrendPerformanceWidget';
 import { TrendHeatmapWidget } from './Widgets/TrendHeatmapWidget';
+import { TrendRadarWidget } from './Widgets/TrendRadarWidget';
 
 // Re-export types and available widgets
 export * from "./types";
@@ -52,6 +53,9 @@ export function DashboardWidgetContent({ type }: { type: WidgetType }) {
       
     case "trendHeatmap":
       return <TrendHeatmapWidget />;
+      
+    case "trendRadar":
+      return <TrendRadarWidget />;
       
     default:
       return <div>Unknown widget type</div>;

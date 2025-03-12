@@ -1,6 +1,6 @@
 
 import { WidgetType } from "../types";
-import { EngagementRadarIcon, KeyMetricsIcon, KeywordCloudIcon, TrendHeatmapIcon } from "../WidgetIcons";
+import { EngagementRadarIcon, KeyMetricsIcon, KeywordCloudIcon, TrendHeatmapIcon, TrendRadarIcon } from "../WidgetIcons";
 
 export interface WidgetCategory {
   name: string;
@@ -18,7 +18,7 @@ export const WIDGET_CATEGORIES: WidgetCategory[] = [
   {
     name: "Engagement",
     icon: EngagementRadarIcon,
-    widgets: ["keyMetrics", "engagementRadar", "topPerformers"]
+    widgets: ["keyMetrics", "engagementRadar", "topPerformers", "trendRadar"]
   },
   {
     name: "Content",

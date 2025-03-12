@@ -17,6 +17,7 @@ export default function Dashboard() {
     { id: "conversion-funnel", type: "conversionFunnel", title: "Conversion Funnel" },
     { id: "traffic-sources", type: "trafficSources", title: "Traffic Sources" },
     { id: "trend-heatmap", type: "trendHeatmap", title: "Trend Heatmap", size: "full" },
+    { id: "trend-radar", type: "trendRadar", title: "Trend Analysis Radar", size: "full" },
   ]);
   
   const [activeTab, setActiveTab] = useState<string>("customizable");
