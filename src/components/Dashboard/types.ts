@@ -9,7 +9,8 @@ export type WidgetType =
   | "engagementRadar"
   | "keywordCloud"
   | "trendHeatmap"
-  | "viralPotential";
+  | "viralPotential"
+  | "trendPerformance";
 
 export interface WidgetData {
   id: string;
@@ -27,5 +28,6 @@ export const availableWidgets: Array<{ type: WidgetType, title: string }> = [
   { type: "topPerformers", title: "Top Performers" },
   { type: "engagementRadar", title: "Engagement Radar" },
   { type: "keywordCloud", title: "Keyword Cloud" },
-  { type: "viralPotential", title: "Viral Potential" }
+  { type: "viralPotential", title: "Viral Potential" },
+  { type: "trendPerformance", title: "Trend Performance" }
 ];

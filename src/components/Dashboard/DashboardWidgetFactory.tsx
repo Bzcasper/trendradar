@@ -1,4 +1,3 @@
-
 import React from "react";
 import { WidgetType } from "./types";
 import { TrafficTrendsWidget } from "./Widgets/TrafficTrendsWidget";
@@ -10,6 +9,7 @@ import { TopPerformersWidget } from "./Widgets/TopPerformersWidget";
 import { EngagementRadarWidget } from "./Widgets/EngagementRadarWidget";
 import { KeywordCloudWidget } from "./Widgets/KeywordCloudWidget";
 import { ViralPotentialWidget } from "./Widgets/ViralPotentialWidget";
+import { TrendPerformanceWidget } from './Widgets/TrendPerformanceWidget';
 
 // Re-export types and available widgets
 export * from "./types";
@@ -45,6 +45,9 @@ export function DashboardWidgetContent({ type }: { type: WidgetType }) {
     case "viralPotential":
       return <ViralPotentialWidget />;
 
+    case "trendPerformance":
+      return <TrendPerformanceWidget />;
+      
     default:
       return <div>Unknown widget type</div>;
   }
