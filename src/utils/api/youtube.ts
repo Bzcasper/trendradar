@@ -27,7 +27,7 @@ export async function fetchYouTubeTrends(query: string, timeframe: string): Prom
     console.error('Error fetching YouTube trends:', error);
     
     const mockYouTubeData = mockTrendData
-      .filter(item => item.category === 'YouTube' || !item.category)
+      .filter(item => item.platform === 'YouTube' || !item.platform)
       .slice(0, 5)
       .map(item => ({
         ...item,

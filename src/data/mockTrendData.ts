@@ -1,28 +1,7 @@
 
-interface KeywordData {
-  keyword: string;
-  count: number;
-}
+import { TrendingItem } from "@/utils/api/types";
 
-interface VideoResult {
-  id: string;
-  video_id: string;
-  title: string;
-  views: number;
-  likes: number;
-  comments: number;
-  category: string;
-  thumbnail_url: string;
-  published_at: string;
-  description: string;
-  engagement_rate?: number;
-  view_velocity?: number;
-  trending_score?: number;
-  viral_probability?: number;
-  keywords?: KeywordData[];
-}
-
-const mockTrendData: VideoResult[] = [
+const mockTrendData: TrendingItem[] = [
   {
     id: '1',
     video_id: 'dQw4w9WgXcQ',
@@ -31,6 +10,7 @@ const mockTrendData: VideoResult[] = [
     likes: 87500,
     comments: 6200,
     category: 'Technology',
+    platform: 'YouTube',
     thumbnail_url: 'https://i.imgur.com/jNNT4LE.jpeg',
     published_at: '2024-01-15T12:00:00Z',
     description: 'Exploring how artificial intelligence is changing the way creators make content for platforms like YouTube.',
@@ -53,6 +33,7 @@ const mockTrendData: VideoResult[] = [
     likes: 45000,
     comments: 3800,
     category: 'Marketing',
+    platform: 'YouTube',
     thumbnail_url: 'https://i.imgur.com/XKGP5zB.jpeg',
     published_at: '2024-02-05T14:30:00Z',
     description: 'The most effective digital marketing strategies that businesses should focus on in 2024.',
@@ -75,6 +56,7 @@ const mockTrendData: VideoResult[] = [
     likes: 92000,
     comments: 8500,
     category: 'Automotive',
+    platform: 'YouTube',
     thumbnail_url: 'https://i.imgur.com/DQTgpyS.jpeg',
     published_at: '2023-12-18T09:15:00Z',
     description: 'How the electric vehicle industry is evolving beyond Tesla, with new players and technologies.',
@@ -97,6 +79,7 @@ const mockTrendData: VideoResult[] = [
     likes: 41000,
     comments: 3200,
     category: 'Lifestyle',
+    platform: 'Twitter',
     thumbnail_url: 'https://i.imgur.com/TLsKlGH.jpeg',
     published_at: '2024-01-28T16:45:00Z',
     description: 'Practical mindfulness techniques to help achieve better work-life balance in a fast-paced world.',
@@ -119,6 +102,7 @@ const mockTrendData: VideoResult[] = [
     likes: 56000,
     comments: 7200,
     category: 'Finance',
+    platform: 'Reddit',
     thumbnail_url: 'https://i.imgur.com/5zGu0Dl.jpeg',
     published_at: '2024-02-10T11:30:00Z',
     description: 'Exploring the evolving world of cryptocurrencies and what to expect in 2024.',
@@ -141,6 +125,7 @@ const mockTrendData: VideoResult[] = [
     likes: 62000,
     comments: 4500,
     category: 'Education',
+    platform: 'YouTube',
     thumbnail_url: 'https://i.imgur.com/zeCJIFp.jpeg',
     published_at: '2023-12-05T10:00:00Z',
     description: 'Scientific approaches to increasing productivity while reducing burnout and stress.',
@@ -163,6 +148,7 @@ const mockTrendData: VideoResult[] = [
     likes: 38000,
     comments: 2900,
     category: 'Fashion',
+    platform: 'TikTok',
     thumbnail_url: 'https://i.imgur.com/QzLY145.jpeg',
     published_at: '2024-01-20T13:15:00Z',
     description: 'How sustainable practices are transforming the fashion industry and what consumers should know.',
@@ -185,6 +171,7 @@ const mockTrendData: VideoResult[] = [
     likes: 48000,
     comments: 5200,
     category: 'Food',
+    platform: 'News',
     thumbnail_url: 'https://i.imgur.com/YKSbEea.jpeg',
     published_at: '2024-02-08T08:45:00Z',
     description: 'Everything you need to know to get started with a plant-based diet, including meal plans and nutrition advice.',
@@ -207,6 +194,7 @@ const mockTrendData: VideoResult[] = [
     likes: 76000,
     comments: 6800,
     category: 'Technology',
+    platform: 'YouTube',
     thumbnail_url: 'https://i.imgur.com/EexQehX.jpeg',
     published_at: '2023-11-30T15:30:00Z',
     description: "A comprehensive explanation of Web3, blockchain, and how they're shaping the next generation of the internet.",
@@ -229,6 +217,7 @@ const mockTrendData: VideoResult[] = [
     likes: 67000,
     comments: 5900,
     category: 'Health',
+    platform: 'Wikipedia',
     thumbnail_url: 'https://i.imgur.com/Sn9Ntx9.jpeg',
     published_at: '2024-01-12T12:30:00Z',
     description: 'Strategies for maintaining good mental health in an increasingly connected and digital world.',
