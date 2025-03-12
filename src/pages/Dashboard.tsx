@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from "react";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { YouTubeAnalytics } from "@/components/YouTubeAnalytics";
 import { AnalyticsDashboard } from "@/components/Dashboard/AnalyticsDashboard";
 import { Button } from "@/components/ui/button";
-import { Plus, X } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DraggableWidget } from "@/components/Dashboard/DraggableWidget";
 import { DashboardWidgetContent, WidgetData, WidgetType, availableWidgets } from "@/components/Dashboard/DashboardWidgetFactory";
@@ -41,7 +40,6 @@ export default function Dashboard() {
     })
   );
   
-  // Effect to handle drag events from the sidebar
   useEffect(() => {
     const handleDragOver = (e: DragEvent) => {
       e.preventDefault();
@@ -55,7 +53,6 @@ export default function Dashboard() {
       }
     };
 
-    // Only add listeners when the customizable tab is active
     if (activeTab === "customizable") {
       document.addEventListener("dragover", handleDragOver);
       document.addEventListener("drop", handleDrop);
@@ -70,7 +67,6 @@ export default function Dashboard() {
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     
-    // Handle sorting of existing widgets
     if (active.id !== over?.id && over?.id) {
       setDashboardWidgets((items) => {
         const oldIndex = items.findIndex((item) => item.id === active.id);
@@ -160,7 +156,6 @@ export default function Dashboard() {
               
               <SortableContext items={dashboardWidgets.map(widget => widget.id)} strategy={verticalListSortingStrategy}>
                 <div className="grid grid-cols-1 gap-6">
-                  {/* Full-width widgets first */}
                   {dashboardWidgets
                     .filter(widget => widget.size === "full")
                     .map((widget) => (
@@ -174,7 +169,6 @@ export default function Dashboard() {
                       </DraggableWidget>
                     ))}
                     
-                  {/* Grid for medium and small widgets */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {dashboardWidgets
                       .filter(widget => widget.size !== "full")
