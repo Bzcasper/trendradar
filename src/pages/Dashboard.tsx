@@ -71,26 +71,26 @@ export default function Dashboard() {
       )}
       
       <div className={`container mx-auto py-8 px-4 sm:px-6 transition-all ${activeTab === "customizable" ? "ml-12" : "ml-0"}`}>
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-[1.618rem] gap-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <h1 className="text-2xl font-bold text-brand-primary">Dashboard</h1>
           
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="glass-morphism rounded-[0.618rem]">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="glass-morphism rounded-md">
             <TabsList className="p-1">
               <TabsTrigger 
                 value="customizable" 
-                className="data-[state=active]:bg-brand-primary data-[state=active]:text-white rounded-[0.382rem]"
+                className="data-[state=active]:bg-brand-primary data-[state=active]:text-white rounded-sm"
               >
                 Customizable
               </TabsTrigger>
               <TabsTrigger 
                 value="standard" 
-                className="data-[state=active]:bg-brand-primary data-[state=active]:text-white rounded-[0.382rem]"
+                className="data-[state=active]:bg-brand-primary data-[state=active]:text-white rounded-sm"
               >
                 Standard
               </TabsTrigger>
               <TabsTrigger 
                 value="platforms" 
-                className="data-[state=active]:bg-brand-primary data-[state=active]:text-white rounded-[0.382rem]"
+                className="data-[state=active]:bg-brand-primary data-[state=active]:text-white rounded-sm"
               >
                 Platform Analytics
               </TabsTrigger>
@@ -99,7 +99,7 @@ export default function Dashboard() {
         </div>
 
         {activeTab === "customizable" ? (
-          <div className="shadow-depth-1 bg-white/50 backdrop-blur-sm p-[1.618rem] rounded-[0.618rem] border border-gray-100">
+          <div className="shadow-depth-1 bg-white p-6 rounded-md border border-gray-100">
             <DashboardGrid
               widgets={dashboardWidgets}
               onWidgetsChange={setDashboardWidgets}
@@ -113,18 +113,18 @@ export default function Dashboard() {
             />
           </div>
         ) : activeTab === "platforms" ? (
-          <div className="shadow-depth-1 bg-white/50 backdrop-blur-sm p-[1.618rem] rounded-[0.618rem] border border-gray-100">
+          <div className="shadow-depth-1 bg-white p-6 rounded-md border border-gray-100">
             <PlatformAnalytics
               currentPlatform={currentPlatform}
               onPlatformChange={setCurrentPlatform}
             />
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-[1.618rem]">
-            <div className="shadow-depth-1 bg-white/50 backdrop-blur-sm p-[1.618rem] rounded-[0.618rem] border border-gray-100">
+          <div className="grid grid-cols-1 gap-6">
+            <div className="shadow-depth-1 bg-white p-6 rounded-md border border-gray-100">
               <AnalyticsDashboard />
             </div>
-            <div className="shadow-depth-1 bg-white/50 backdrop-blur-sm p-[1.618rem] rounded-[0.618rem] border border-gray-100">
+            <div className="shadow-depth-1 bg-white p-6 rounded-md border border-gray-100">
               <YouTubeAnalytics />
             </div>
           </div>

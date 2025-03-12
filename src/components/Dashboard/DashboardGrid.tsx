@@ -45,21 +45,18 @@ export function DashboardGrid({ widgets, onWidgetsChange, onRemoveWidget, onOpen
     }));
   };
 
-  // Golden ratio spacing: 1.618rem
-  const spacing = "1.618rem";
-
   return (
     <DndContext 
       sensors={sensors} 
       collisionDetection={closestCenter} 
       onDragEnd={handleDragEnd}
     >
-      <div className="space-y-[1.618rem]">
-        <div className="flex justify-end mb-[1.618rem]">
+      <div className="space-y-6">
+        <div className="flex justify-end mb-6">
           <Button 
             size="sm" 
             variant="outline" 
-            className="flex items-center gap-1 bg-brand-primary text-white hover:bg-brand-primary/90 border-none rounded-[0.618rem] px-[1.618rem] py-[0.618rem]" 
+            className="flex items-center gap-1 bg-brand-primary text-white hover:bg-brand-primary/90 border-none rounded-md px-4 py-2" 
             onClick={onOpenAddDialog}
           >
             <Plus className="h-4 w-4" />
@@ -68,9 +65,9 @@ export function DashboardGrid({ widgets, onWidgetsChange, onRemoveWidget, onOpen
         </div>
         
         <SortableContext items={widgets.map(widget => widget.id)} strategy={verticalListSortingStrategy}>
-          <div className="grid grid-cols-1 gap-0">
+          <div className="grid grid-cols-1 gap-6">
             {/* Full-width widgets with resizing */}
-            <div className="space-y-0 mb-[1.618rem]">
+            <div className="space-y-6">
               {widgets
                 .filter(widget => widget.size === "full")
                 .map((widget) => (
@@ -88,7 +85,7 @@ export function DashboardGrid({ widgets, onWidgetsChange, onRemoveWidget, onOpen
             </div>
               
             {/* Responsive grid for smaller widgets with resizing */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[1.618rem]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {widgets
                 .filter(widget => widget.size !== "full")
                 .map((widget) => (

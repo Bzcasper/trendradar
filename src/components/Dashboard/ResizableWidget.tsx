@@ -107,7 +107,7 @@ export function ResizableWidget({
   return (
     <div 
       ref={widgetRef}
-      className="relative mb-[1.618rem]" 
+      className="relative mb-4" 
       style={{ 
         width: typeof size.width === 'number' ? `${size.width}px` : size.width, 
         height: typeof size.height === 'number' ? `${size.height}px` : size.height,
@@ -122,23 +122,19 @@ export function ResizableWidget({
       
       {/* Resize handles */}
       <div 
-        className="absolute top-0 right-0 cursor-ne-resize bg-brand-primary/50 hover:bg-brand-primary/80 rounded-tr-[0.382rem] z-20"
-        style={{ width: handleSize, height: handleSize }}
+        className="resizable-handle resizable-handle-ne w-2 h-2"
         onMouseDown={(e) => handleResizeStart(e, 'ne')}
       />
       <div 
-        className="absolute bottom-0 right-0 cursor-se-resize bg-brand-primary/50 hover:bg-brand-primary/80 rounded-br-[0.382rem] z-20"
-        style={{ width: handleSize, height: handleSize }}
+        className="resizable-handle resizable-handle-se w-2 h-2"
         onMouseDown={(e) => handleResizeStart(e, 'se')}
       />
       <div 
-        className="absolute bottom-0 left-0 cursor-sw-resize bg-brand-primary/50 hover:bg-brand-primary/80 rounded-bl-[0.382rem] z-20"
-        style={{ width: handleSize, height: handleSize }}
+        className="resizable-handle resizable-handle-sw w-2 h-2"
         onMouseDown={(e) => handleResizeStart(e, 'sw')}
       />
       <div 
-        className="absolute top-0 left-0 cursor-nw-resize bg-brand-primary/50 hover:bg-brand-primary/80 rounded-tl-[0.382rem] z-20"
-        style={{ width: handleSize, height: handleSize }}
+        className="resizable-handle resizable-handle-nw w-2 h-2"
         onMouseDown={(e) => handleResizeStart(e, 'nw')}
       />
     </div>
