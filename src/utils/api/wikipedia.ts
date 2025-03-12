@@ -1,67 +1,66 @@
 
 import { TrendingItem } from './types';
-import { extractKeywords, filterTrendsByQuery } from './utils';
-import mockTrendData from '@/data/mockTrendData';
+import { supabase } from '@/integrations/supabase/client';
+import { extractKeywords } from './utils';
 
 export async function fetchWikipediaTrends(query: string, timeframe: string): Promise<TrendingItem[]> {
   try {
-    const date = new Date();
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    
-    const response = await fetch(
-      `https://wikimedia.org/api/rest_v1/metrics/pageviews/top/en.wikipedia/all-access/${year}/${month}/${day}`
-    );
-    
-    if (!response.ok) {
-      throw new Error('Wikipedia API request failed');
-    }
-    
-    const data = await response.json();
-    
-    if (!data.items || !data.items[0] || !data.items[0].articles) {
-      throw new Error('Invalid Wikipedia API response');
-    }
-    
-    const articles = data.items[0].articles.slice(0, 10);
-    
-    const results = articles.map((article: any, index: number) => {
-      const views = article.views || Math.floor(Math.random() * 100000) + 10000;
-      const likes = Math.floor(views * (Math.random() * 0.05 + 0.01));
-      const comments = Math.floor(likes * (Math.random() * 0.3 + 0.1));
-      
-      const publishedDate = new Date();
-      publishedDate.setDate(publishedDate.getDate() - Math.floor(Math.random() * 30));
-      
-      return {
-        id: `wikipedia-${index}`,
-        video_id: article.article,
-        title: article.article.replace(/_/g, ' '),
-        views,
-        likes,
-        comments,
-        category: 'Knowledge',
-        platform: 'Wikipedia',
-        thumbnail_url: `https://picsum.photos/seed/wiki${index}/300/200`,
-        published_at: publishedDate.toISOString(),
-        description: `This Wikipedia article has been viewed ${views} times.`,
-        keywords: extractKeywords(article.article.replace(/_/g, ' '))
-      };
+    // Call Supabase Edge Function to handle Wikipedia API requests
+    const { data, error } = await supabase.functions.invoke('wikipedia-trends', {
+      body: { query, timeframe }
     });
     
-    return filterTrendsByQuery(results, query);
-  } catch (error) {
-    console.error('Error fetching Wikipedia trends:', error);
+    if (error) {
+      console.error('Supabase Wikipedia search error:', error);
+      throw error;
+    }
     
-    const mockWikiData = mockTrendData
-      .filter(item => item.category === 'Wikipedia')
-      .slice(0, 5)
-      .map(item => ({
+    if (data && Array.isArray(data)) {
+      return data.map(item => ({
         ...item,
         platform: 'Wikipedia'
       }));
+    }
+    
+    throw new Error('Invalid response from Wikipedia API');
+  } catch (error) {
+    console.error('Error fetching Wikipedia trends:', error);
+    
+    // Fallback to synthetic data
+    const wikiTrends = [
+      "Artificial Intelligence: Evolution and Impact on Society",
+      "Climate Change: Latest Research and Global Response",
+      "Space Exploration: Recent Discoveries and Future Missions",
+      "Quantum Computing: Breakthroughs and Applications",
+      "Renewable Energy: Innovations and Global Adoption"
+    ];
+    
+    const results = wikiTrends
+      .filter(title => query ? title.toLowerCase().includes(query.toLowerCase()) : true)
+      .map((title, index) => {
+        const createdDate = new Date();
+        createdDate.setDate(createdDate.getDate() - Math.floor(Math.random() * 14));
+        
+        const views = Math.floor(Math.random() * 300000) + 20000;
+        const likes = Math.floor(views * (Math.random() * 0.02 + 0.01));
+        const comments = Math.floor(likes * (Math.random() * 0.1 + 0.05));
+        
+        return {
+          id: `wiki-${index}`,
+          video_id: `wiki-article-${index}`,
+          title,
+          views,
+          likes,
+          comments,
+          category: 'Knowledge',
+          platform: 'Wikipedia',
+          thumbnail_url: `https://picsum.photos/seed/wiki${index}/300/200`,
+          published_at: createdDate.toISOString(),
+          description: `Trending Wikipedia article about ${title.split(':')[0].trim()}`,
+          keywords: extractKeywords(title)
+        };
+      });
       
-    return filterTrendsByQuery(mockWikiData, query);
+    return results;
   }
 }

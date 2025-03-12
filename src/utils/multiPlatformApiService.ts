@@ -2,12 +2,14 @@
 import { calculateTrendingScore, calculateFibonacciRetracement } from "./trendingAlgorithm";
 import mockTrendData from "@/data/mockTrendData";
 import { TrendingItem, ApiEndpoint } from "./api/types";
-import { fetchYouTubeTrends } from "./api/youtube";
+import { fetchYouTubeTrends, analyzeSingleYouTubeVideo } from "./api/youtube";
 import { fetchRedditTrends } from "./api/reddit";
 import { fetchTwitterTrends } from "./api/twitter";
 import { fetchTikTokTrends } from "./api/tiktok";
 import { fetchNewsTrends } from "./api/news";
 import { fetchWikipediaTrends } from "./api/wikipedia";
+import { fetchPinterestTrends } from "./api/pinterest";
+import { fetchExplodingTopics } from "./api/explodingTopics";
 import { filterTrendsByQuery } from "./api/utils";
 
 export type { TrendingItem };
@@ -51,6 +53,16 @@ export async function fetchMultiPlatformTrends(
         name: 'wikipedia',
         enabled: isAllPlatforms || platforms.includes('wikipedia'),
         fetchFunction: fetchWikipediaTrends
+      },
+      {
+        name: 'pinterest',
+        enabled: isAllPlatforms || platforms.includes('pinterest'),
+        fetchFunction: fetchPinterestTrends
+      },
+      {
+        name: 'explodingTopics',
+        enabled: isAllPlatforms || platforms.includes('explodingTopics'),
+        fetchFunction: fetchExplodingTopics
       }
     ];
     
@@ -80,34 +92,66 @@ export async function fetchMultiPlatformTrends(
   }
 }
 
-function processResults(results: TrendingItem[]): TrendingItem[] {
-  return results.map(item => {
-    const trendingMetrics = calculateTrendingScore(
-      item.views,
-      item.likes,
-      item.comments,
-      new Date(item.published_at),
-      item.engagement_rate || 0
-    );
+/**
+ * Analyze a specific piece of content (video, post, etc.) using our trending algorithm
+ */
+export async function analyzeContent(
+  contentId: string,
+  platform: string = 'youtube'
+): Promise<TrendingItem | null> {
+  try {
+    let contentData: TrendingItem | null = null;
     
-    let fiboRetracement;
-    if (item.views > 100000) {
-      const peakValue = item.views * 1.2;
-      fiboRetracement = calculateFibonacciRetracement(peakValue, item.views);
+    switch (platform.toLowerCase()) {
+      case 'youtube':
+        contentData = await analyzeSingleYouTubeVideo(contentId);
+        break;
+      // Add other platform-specific analysis functions as needed
+      default:
+        throw new Error(`Unsupported platform: ${platform}`);
     }
     
-    return {
-      ...item,
-      engagement_rate: trendingMetrics.engagementRate,
-      view_velocity: trendingMetrics.viewVelocity,
-      trending_score: trendingMetrics.trendingScore,
-      viral_probability: trendingMetrics.viralProbability,
-      trend_acceleration: trendingMetrics.trendAcceleration,
-      rsi: trendingMetrics.rsi,
-      relative_volume: trendingMetrics.relativeVolume,
-      fibo_retracement: fiboRetracement
-    };
-  });
+    if (!contentData) {
+      return null;
+    }
+    
+    return processContentItem(contentData);
+  } catch (error) {
+    console.error('Error analyzing content:', error);
+    return null;
+  }
+}
+
+function processResults(results: TrendingItem[]): TrendingItem[] {
+  return results.map(processContentItem);
+}
+
+function processContentItem(item: TrendingItem): TrendingItem {
+  const trendingMetrics = calculateTrendingScore(
+    item.views,
+    item.likes,
+    item.comments,
+    new Date(item.published_at),
+    item.engagement_rate || 0
+  );
+  
+  let fiboRetracement;
+  if (item.views > 100000) {
+    const peakValue = item.views * 1.2;
+    fiboRetracement = calculateFibonacciRetracement(peakValue, item.views);
+  }
+  
+  return {
+    ...item,
+    engagement_rate: trendingMetrics.engagementRate,
+    view_velocity: trendingMetrics.viewVelocity,
+    trending_score: trendingMetrics.trendingScore,
+    viral_probability: trendingMetrics.viralProbability,
+    trend_acceleration: trendingMetrics.trendAcceleration,
+    rsi: trendingMetrics.rsi,
+    relative_volume: trendingMetrics.relativeVolume,
+    fibo_retracement: fiboRetracement
+  };
 }
 
 function filterMockData(query: string): TrendingItem[] {

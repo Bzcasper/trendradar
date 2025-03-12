@@ -27,3 +27,25 @@ export interface ApiEndpoint {
   enabled: boolean;
   fetchFunction: (query: string, timeframe: string) => Promise<TrendingItem[]>;
 }
+
+export const SUPPORTED_PLATFORMS = [
+  'all',
+  'youtube',
+  'twitter',
+  'tiktok',
+  'reddit',
+  'news',
+  'wikipedia',
+  'pinterest',
+  'explodingTopics'
+] as const;
+
+export type SupportedPlatform = typeof SUPPORTED_PLATFORMS[number];
+
+export interface ApiConfig {
+  apiKey?: string;
+  apiEndpoint?: string;
+  maxResults?: number;
+  language?: string;
+  region?: string;
+}

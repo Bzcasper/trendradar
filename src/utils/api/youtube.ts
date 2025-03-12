@@ -37,3 +37,28 @@ export async function fetchYouTubeTrends(query: string, timeframe: string): Prom
     return filterTrendsByQuery(mockYouTubeData, query);
   }
 }
+
+export async function analyzeSingleYouTubeVideo(videoId: string): Promise<TrendingItem | null> {
+  try {
+    const { data, error } = await supabase.functions.invoke('youtube-video-analysis', {
+      body: { videoId }
+    });
+    
+    if (error) {
+      console.error('Supabase YouTube video analysis error:', error);
+      throw error;
+    }
+    
+    if (data) {
+      return {
+        ...data,
+        platform: 'YouTube'
+      };
+    }
+    
+    throw new Error('Invalid response from YouTube API');
+  } catch (error) {
+    console.error('Error analyzing YouTube video:', error);
+    return null;
+  }
+}
