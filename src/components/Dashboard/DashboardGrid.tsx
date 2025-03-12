@@ -35,18 +35,21 @@ export function DashboardGrid({ widgets, onWidgetsChange, onRemoveWidget, onOpen
     }
   };
 
+  // Golden ratio spacing: 1.618rem
+  const spacing = "1.618rem";
+
   return (
     <DndContext 
       sensors={sensors} 
       collisionDetection={closestCenter} 
       onDragEnd={handleDragEnd}
     >
-      <div className="space-y-8">
-        <div className="flex justify-end">
+      <div style={{ gap: spacing }} className="space-y-0">
+        <div className="flex justify-end mb-6">
           <Button 
             size="sm" 
             variant="outline" 
-            className="flex items-center gap-1 bg-brand-primary text-white hover:bg-brand-primary/90 border-brand-primary" 
+            className="flex items-center gap-1 bg-brand-primary text-white hover:bg-brand-primary/90 border-brand-primary rounded-[0.618rem] px-[1.618rem] py-[0.618rem]" 
             onClick={onOpenAddDialog}
           >
             <Plus className="h-4 w-4" />
@@ -55,9 +58,9 @@ export function DashboardGrid({ widgets, onWidgetsChange, onRemoveWidget, onOpen
         </div>
         
         <SortableContext items={widgets.map(widget => widget.id)} strategy={verticalListSortingStrategy}>
-          <div className="grid grid-cols-1 gap-6">
+          <div className="grid grid-cols-1 gap-[1.618rem]">
             {/* Full-width widgets first */}
-            <div className="space-y-6">
+            <div style={{ gap: spacing }} className="space-y-0 mb-[1.618rem]">
               {widgets
                 .filter(widget => widget.size === "full")
                 .map((widget) => (
@@ -73,7 +76,7 @@ export function DashboardGrid({ widgets, onWidgetsChange, onRemoveWidget, onOpen
             </div>
               
             {/* Responsive grid for smaller widgets */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[1.618rem]">
               {widgets
                 .filter(widget => widget.size !== "full")
                 .map((widget) => (
