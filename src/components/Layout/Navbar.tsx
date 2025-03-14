@@ -38,14 +38,14 @@ export const Navbar = () => {
           </div>
           
           {/* Desktop menu */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex md:items-center md:space-x-6">
             <Link to="/features" className="text-white/80 hover:text-[#48D1CC] transition-colors">Features</Link>
             <Link to="/how-it-works" className="text-white/80 hover:text-[#48D1CC] transition-colors">How It Works</Link>
             <Link to="/pricing" className="text-white/80 hover:text-[#48D1CC] transition-colors">Pricing</Link>
             <Link to="/resources" className="text-white/80 hover:text-[#48D1CC] transition-colors">Resources</Link>
             <Link to="/contact" className="text-white/80 hover:text-[#48D1CC] transition-colors">Contact</Link>
             
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4 ml-4">
               {user ? (
                 <>
                   <Button 

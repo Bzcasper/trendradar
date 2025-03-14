@@ -83,7 +83,7 @@ export function WidgetSidebar({ onAddWidget }: WidgetSidebarProps) {
       ref={sidebarRef}
       className={cn(
         "fixed left-0 top-16 h-[calc(100vh-64px)] bg-white border-r transition-all duration-300 z-10",
-        isExpanded ? "" : "w-12"
+        isExpanded ? "shadow-lg" : "w-12"
       )}
       style={{ width: isExpanded ? `${width}px` : '48px' }}
       aria-label="Widget sidebar"

@@ -24,6 +24,8 @@ export default function Dashboard() {
     { id: "traffic-sources", type: "trafficSources", title: "Traffic Sources" },
     { id: "trend-heatmap", type: "trendHeatmap", title: "Trend Heatmap", size: "full" },
     { id: "trend-radar", type: "trendRadar", title: "Trend Analysis Radar", size: "full" },
+    { id: "keyword-cloud", type: "keywordCloud", title: "Keyword Cloud" },
+    { id: "viral-potential", type: "viralPotential", title: "Viral Potential" },
   ]);
   
   const [activeTab, setActiveTab] = useState<string>("customizable");
@@ -38,14 +40,20 @@ export default function Dashboard() {
   
   // Redirect to auth if not logged in
   useEffect(() => {
-    if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to access the dashboard",
-        variant: "destructive",
-      });
-      navigate('/auth');
-    }
+    const checkAuth = () => {
+      if (!user) {
+        toast({
+          title: "Authentication required",
+          description: "Please sign in to access the dashboard",
+          variant: "destructive",
+        });
+        navigate('/auth');
+      }
+    };
+    
+    // Small timeout to ensure auth state is fully loaded
+    const timer = setTimeout(checkAuth, 300);
+    return () => clearTimeout(timer);
   }, [user, navigate, toast]);
   
   const handleScroll = useCallback(() => {
@@ -107,18 +115,22 @@ export default function Dashboard() {
   const handleAddWidget = useCallback((type: WidgetType) => {
     const widget = availableWidgets.find(w => w.type === type);
     if (widget) {
-      setDashboardWidgets(prev => [
-        ...prev,
-        {
-          id: `${type}-${nanoid(6)}`,
-          type: type,
-          title: widget.title,
-          size: type === "trafficTrends" || type === "trendHeatmap" || type === "trendPerformance" || type === "trendRadar" ? "full" : "medium"
-        }
-      ]);
+      const newWidget = {
+        id: `${type}-${nanoid(6)}`,
+        type: type,
+        title: widget.title,
+        size: type === "trafficTrends" || type === "trendHeatmap" || type === "trendPerformance" || type === "trendRadar" ? "full" : "medium"
+      };
+      
+      setDashboardWidgets(prev => [...prev, newWidget]);
       setDialogOpen(false);
+      
+      toast({
+        title: "Widget added",
+        description: `${widget.title} widget has been added to your dashboard`,
+      });
     }
-  }, []);
+  }, [toast]);
   
   if (!user) {
     return null; // Avoid flashing content before redirect
@@ -147,7 +159,13 @@ export default function Dashboard() {
             <DashboardGrid
               widgets={dashboardWidgets}
               onWidgetsChange={setDashboardWidgets}
-              onRemoveWidget={(id) => setDashboardWidgets(prev => prev.filter(w => w.id !== id))}
+              onRemoveWidget={(id) => {
+                setDashboardWidgets(prev => prev.filter(w => w.id !== id));
+                toast({
+                  title: "Widget removed",
+                  description: "Widget has been removed from your dashboard",
+                });
+              }}
               onOpenAddDialog={() => setDialogOpen(true)}
             />
             <AddWidgetDialog
