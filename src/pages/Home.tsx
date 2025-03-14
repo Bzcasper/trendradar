@@ -1,10 +1,10 @@
 
 import { useState, useEffect } from "react";
-import { Navbar } from "@/components/Layout/Navbar";
 import { HeroSection } from "@/components/Home/HeroSection";
 import { FeaturesSection } from "@/components/Home/FeaturesSection";
 import { SocialProofSection } from "@/components/Home/SocialProofSection";
 import { CtaSection } from "@/components/Home/CtaSection";
+import { Navbar } from "@/components/Layout/Navbar";
 
 export default function Home() {
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -104,10 +104,12 @@ export default function Home() {
       />
 
       <Navbar />
-      <HeroSection />
-      <FeaturesSection />
-      <SocialProofSection />
-      <CtaSection />
+      <main>
+        <HeroSection />
+        <FeaturesSection />
+        <SocialProofSection />
+        <CtaSection />
+      </main>
     </div>
   );
 }

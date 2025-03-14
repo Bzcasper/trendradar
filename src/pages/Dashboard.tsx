@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef, useCallback } from "react";
 import { DashboardTabs } from "@/components/Dashboard/Navigation/DashboardTabs";
 import { DashboardHeader } from "@/components/Dashboard/Navigation/DashboardHeader";
@@ -7,10 +8,13 @@ import { AnalyticsDashboard } from "@/components/Dashboard/AnalyticsDashboard";
 import { DashboardGrid } from "@/components/Dashboard/DashboardGrid";
 import { PlatformAnalytics } from "@/components/Dashboard/PlatformAnalytics";
 import { AddWidgetDialog } from "@/components/Dashboard/AddWidgetDialog";
-import { WidgetSidebar } from "@/components/Dashboard/WidgetSidebar";
+import { WidgetSidebar } from "@/components/Dashboard/Sidebar";
 import { WidgetData, WidgetType } from "@/components/Dashboard/types";
 import { availableWidgets } from "@/components/Dashboard/utils/availableWidgets";
 import { nanoid } from "nanoid";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Dashboard() {
   const [dashboardWidgets, setDashboardWidgets] = useState<WidgetData[]>([
@@ -28,6 +32,21 @@ export default function Dashboard() {
   const [showNavbar, setShowNavbar] = useState(true);
   const lastScrollY = useRef(0);
   const scrollTimer = useRef<number | null>(null);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  
+  // Redirect to auth if not logged in
+  useEffect(() => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to access the dashboard",
+        variant: "destructive",
+      });
+      navigate('/auth');
+    }
+  }, [user, navigate, toast]);
   
   const handleScroll = useCallback(() => {
     const currentScrollY = window.scrollY;
@@ -94,12 +113,16 @@ export default function Dashboard() {
           id: `${type}-${nanoid(6)}`,
           type: type,
           title: widget.title,
-          size: type === "trafficTrends" || type === "trendHeatmap" || type === "trendPerformance" ? "full" : "medium"
+          size: type === "trafficTrends" || type === "trendHeatmap" || type === "trendPerformance" || type === "trendRadar" ? "full" : "medium"
         }
       ]);
       setDialogOpen(false);
     }
   }, []);
+  
+  if (!user) {
+    return null; // Avoid flashing content before redirect
+  }
   
   return (
     <div className="min-h-screen dashboard-bg relative overflow-x-hidden pb-20">
@@ -110,7 +133,7 @@ export default function Dashboard() {
       )}
       
       <main 
-        className={`container mx-auto py-8 px-4 sm:px-6 transition-all ${activeTab === "customizable" ? "ml-12" : "ml-0"}`} 
+        className={`container mx-auto py-8 px-4 sm:px-6 transition-all ${activeTab === "customizable" ? "ml-12 md:ml-12" : "ml-0"}`} 
         style={{ marginTop: '64px' }}
         aria-label="Dashboard content"
       >

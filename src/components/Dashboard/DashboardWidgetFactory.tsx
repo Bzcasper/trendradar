@@ -14,50 +14,60 @@ import { TrendPerformanceWidget } from './Widgets/TrendPerformanceWidget';
 import { TrendHeatmapWidget } from './Widgets/TrendHeatmapWidget';
 import { TrendRadarWidget } from './Widgets/TrendRadarWidget';
 
-// Re-export types and available widgets
-export * from "./types";
-
 // Widget factory component
 export function DashboardWidgetContent({ type }: { type: WidgetType }) {
-  // Render widget based on type
-  switch (type) {
-    case "trafficTrends":
-      return <TrafficTrendsWidget />;
-      
-    case "trafficSources":
-      return <TrafficSourcesWidget />;
-      
-    case "conversionFunnel":
-      return <ConversionFunnelWidget />;
-      
-    case "platformPerformance":
-      return <PlatformPerformanceWidget />;
-      
-    case "keyMetrics":
-      return <KeyMetricsWidget />;
+  // Render widget based on type with error handling
+  try {
+    switch (type) {
+      case "trafficTrends":
+        return <TrafficTrendsWidget />;
+        
+      case "trafficSources":
+        return <TrafficSourcesWidget />;
+        
+      case "conversionFunnel":
+        return <ConversionFunnelWidget />;
+        
+      case "platformPerformance":
+        return <PlatformPerformanceWidget />;
+        
+      case "keyMetrics":
+        return <KeyMetricsWidget />;
 
-    case "topPerformers":
-      return <TopPerformersWidget />;
+      case "topPerformers":
+        return <TopPerformersWidget />;
 
-    case "engagementRadar":
-      return <EngagementRadarWidget />;
+      case "engagementRadar":
+        return <EngagementRadarWidget />;
 
-    case "keywordCloud":
-      return <KeywordCloudWidget />;
+      case "keywordCloud":
+        return <KeywordCloudWidget />;
 
-    case "viralPotential":
-      return <ViralPotentialWidget />;
+      case "viralPotential":
+        return <ViralPotentialWidget />;
 
-    case "trendPerformance":
-      return <TrendPerformanceWidget />;
-      
-    case "trendHeatmap":
-      return <TrendHeatmapWidget />;
-      
-    case "trendRadar":
-      return <TrendRadarWidget />;
-      
-    default:
-      return <div>Unknown widget type</div>;
+      case "trendPerformance":
+        return <TrendPerformanceWidget />;
+        
+      case "trendHeatmap":
+        return <TrendHeatmapWidget />;
+        
+      case "trendRadar":
+        return <TrendRadarWidget />;
+        
+      default:
+        console.warn(`Unknown widget type: ${type}`);
+        return <div className="p-4 text-center text-gray-500">Unknown widget type: {type}</div>;
+    }
+  } catch (error) {
+    console.error(`Error rendering widget of type ${type}:`, error);
+    return (
+      <div className="p-4 text-center text-red-500 border border-red-200 bg-red-50 rounded-md">
+        Error loading widget. Please try refreshing the page.
+      </div>
+    );
   }
 }
+
+// Re-export types 
+export * from "./types";
